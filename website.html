@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio — Photography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --fg: #1a1a1a;
+    --fg-muted: #6b6b6b;
+    --fg-faint: #a0a0a0;
+    --accent: #2a2a2a;
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --transition: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ===== NAVIGATION ===== */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 28px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.5s var(--transition);
+    background: transparent;
+  }
+
+  nav.scrolled {
+    padding: 18px 48px;
+    background: rgba(245, 244, 240, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .logo {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    color: var(--fg);
+    text-decoration: none;
+    transition: opacity 0.3s;
+  }
+  .logo:hover { opacity: 0.6; }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    text-decoration: none;
+    position: relative;
+    transition: color 0.3s;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--fg);
+    transition: width 0.4s var(--transition);
+  }
+
+  .nav-links a:hover { color: var(--fg); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-links a.active { color: var(--fg); }
+  .nav-links a.active::after { width: 100%; }
+
+  /* ===== MOBILE MENU ===== */
+  .menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 28px;
+    height: 20px;
+    position: relative;
+    z-index: 200;
+  }
+
+  .menu-toggle span {
+    display: block;
+    width: 100%;
+    height: 1.5px;
+    background: var(--fg);
+    position: absolute;
+    left: 0;
+    transition: all 0.3s var(--transition);
+  }
+
+  .menu-toggle span:nth-child(1) { top: 0; }
+  .menu-toggle span:nth-child(2) { top: 9px; }
+  .menu-toggle span:nth-child(3) { top: 18px; }
+
+  .menu-toggle.open span:nth-child(1) { top: 9px; transform: rotate(45deg); }
+  .menu-toggle.open span:nth-child(2) { opacity: 0; }
+  .menu-toggle.open span:nth-child(3) { top: 9px; transform: rotate(-45deg); }
+
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 150;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .mobile-menu.open {
+    display: flex;
+    opacity: 1;
+  }
+
+  .mobile-menu a {
+    font-family: var(--serif);
+    font-size: 2.2rem;
+    font-weight: 300;
+    color: var(--fg);
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: opacity 0.3s;
+  }
+
+  .mobile-menu a:hover { opacity: 0.5; }
+
+  /* ===== HERO ===== */
+  .hero {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 24px;
+    position: relative;
+  }
+
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+    opacity: 0;
+    transform: translateY(40px);
+    animation: fadeUp 1.2s var(--transition) 0.3s forwards;
+  }
+
+  .hero-subtitle {
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-top: 24px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 1s var(--transition) 0.8s forwards;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 48px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeUp 1s var(--transition) 1.4s forwards;
+  }
+
+  .scroll-indicator span {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 48px;
+    background: var(--fg-faint);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scroll-line::after {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 1px;
+    height: 100%;
+    background: var(--fg);
+    animation: scrollDown 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollDown {
+    0% { top: -100%; }
+    100% { top: 100%; }
+  }
+
+  /* ===== SECTION HEADERS ===== */
+  .section-header {
+    text-align: center;
+    padding: 120px 24px 60px;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 300;
+    color: var(--fg);
+    letter-spacing: -0.01em;
+  }
+
+  .section-divider {
+    width: 48px;
+    height: 1px;
+    background: var(--fg-faint);
+    margin: 24px auto 0;
+  }
+
+  /* ===== GALLERY FILTERS ===== */
+  .gallery-filters {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    padding: 0 24px 48px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 0;
+    position: relative;
+    transition: color 0.3s;
+  }
+
+  .filter-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--fg);
+    transition: width 0.4s var(--transition);
+  }
+
+  .filter-btn:hover,
+  .filter-btn.active { color: var(--fg); }
+  .filter-btn.active::after { width: 100%; }
+
+  /* ===== MASONRY GALLERY ===== */
+  .gallery {
+    padding: 0 clamp(16px, 3vw, 48px);
+    columns: 3;
+    column-gap: clamp(12px, 1.5vw, 20px);
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .gallery-item {
+    break-inside: avoid;
+    margin-bottom: clamp(12px, 1.5vw, 20px);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: 2px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s var(--transition), transform 0.6s var(--transition);
+  }
+
+  .gallery-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .gallery-item.hidden {
+    display: none;
+  }
+
+  .gallery-item img {
+    width: 100%;
+    display: block;
+    transition: transform 0.8s var(--transition);
+  }
+
+  .gallery-item:hover img {
+    transform: scale(1.03);
+  }
+
+  .gallery-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.5s var(--transition);
+    display: flex;
+    align-items: flex-end;
+    padding: 28px;
+  }
+
+  .gallery-item:hover .gallery-overlay {
+    opacity: 1;
+  }
+
+  .gallery-overlay-text {
+    color: #fff;
+  }
+
+  .gallery-overlay-text h3 {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+
+  .gallery-overlay-text span {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  /* ===== LIGHTBOX ===== */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(10, 10, 10, 0.96);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s var(--transition);
+    cursor: zoom-out;
+  }
+
+  .lightbox.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 88vh;
+    object-fit: contain;
+    border-radius: 2px;
+    transform: scale(0.95);
+    transition: transform 0.5s var(--transition);
+  }
+
+  .lightbox.active img {
+    transform: scale(1);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 28px;
+    right: 36px;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox-close::before,
+  .lightbox-close::after {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 1.5px;
+    background: rgba(255,255,255,0.7);
+    transition: background 0.3s;
+  }
+
+  .lightbox-close::before { transform: rotate(45deg); }
+  .lightbox-close::after { transform: rotate(-45deg); }
+  .lightbox-close:hover::before,
+  .lightbox-close:hover::after { background: #fff; }
+
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 20px;
+    color: rgba(255,255,255,0.5);
+    font-size: 1.8rem;
+    transition: color 0.3s;
+  }
+
+  .lightbox-nav:hover { color: #fff; }
+  .lightbox-prev { left: 20px; }
+  .lightbox-next { right: 20px; }
+
+  .lightbox-caption {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .lightbox-caption h3 {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 300;
+    margin-bottom: 2px;
+  }
+
+  .lightbox-caption span {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* ===== ABOUT ===== */
+  .about {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 80px 24px 120px;
+    text-align: center;
+  }
+
+  .about p {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--fg-muted);
+    font-style: italic;
+  }
+
+  .about-name {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+    margin-top: 32px;
+  }
+
+  /* ===== CONTACT ===== */
+  .contact {
+    text-align: center;
+    padding: 0 24px 120px;
+  }
+
+  .contact a {
+    font-family: var(--serif);
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    font-weight: 300;
+    color: var(--fg);
+    text-decoration: none;
+    border-bottom: 1px solid var(--fg-faint);
+    padding-bottom: 4px;
+    transition: border-color 0.3s;
+  }
+
+  .contact a:hover {
+    border-color: var(--fg);
+  }
+
+  .contact-socials {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 36px;
+  }
+
+  .contact-socials a {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: none;
+    color: var(--fg-faint);
+    padding: 0;
+  }
+
+  .contact-socials a:hover { color: var(--fg); }
+
+  /* ===== FOOTER ===== */
+  footer {
+    text-align: center;
+    padding: 36px 24px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+
+  footer p {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--fg-faint);
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1024px) {
+    .gallery { columns: 2; }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 20px 24px; }
+    nav.scrolled { padding: 16px 24px; }
+
+    .nav-links { display: none; }
+    .menu-toggle { display: block; }
+
+    .gallery { columns: 2; }
+
+    .hero-title { font-size: clamp(2.4rem, 10vw, 4.5rem); }
+  }
+
+  @media (max-width: 480px) {
+    .gallery {
+      columns: 1;
+      padding: 0 16px;
+    }
+
+    .gallery-filters { gap: 20px; }
+
+    .lightbox-nav { display: none; }
+  }
+
+  /* ===== SCROLL REVEAL ===== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s var(--transition), transform 0.8s var(--transition);
+  }
+
+  .reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav id="navbar">
+  <a href="#" class="logo">Your Name</a>
+  <ul class="nav-links">
+    <li><a href="#gallery" class="active">Gallery</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#gallery">Gallery</a>
+  <a href="#about">About</a>
+  <a href="#contact">Contact</a>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <h1 class="hero-title">Moments<br><em>in Light</em></h1>
+  <p class="hero-subtitle">Photography Portfolio</p>
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- Gallery Section -->
+<section id="gallery">
+  <div class="section-header reveal">
+    <p class="section-label">Selected Work</p>
+    <h2 class="section-title">Gallery</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="gallery-filters reveal">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="landscape">Landscape</button>
+    <button class="filter-btn" data-filter="portrait">Portrait</button>
+    <button class="filter-btn" data-filter="street">Street</button>
+    <button class="filter-btn" data-filter="nature">Nature</button>
+  </div>
+
+  <div class="gallery" id="galleryGrid">
+    <!-- Row 1 -->
+    <div class="gallery-item" data-category="landscape" data-title="Golden Hour" data-cat-label="Landscape">
+      <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80" alt="Mountain landscape" loading="lazy">
+      <div class="gallery-overlay">
+        <div class="gallery-overlay-text">
+          <h3>Golden Hour</h3>
+          <span>Landscape</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gallery-item" data-category="portrait" data-title="Silent Gaze" data-cat-label="Portrait">
+      <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&q=80" alt="Portrait photography" loading="lazy">
+      <div class="gallery-overlay">
+        <div class="gallery-overlay-text">
+          <h3>Silent Gaze</h3>
+          <span>Portrait</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gallery-item" data-category="street" data-title="City Pulse" data-cat-label="Street">
+      <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80" alt="City street at night" loading="lazy">
+      <div class="gallery-overlay">
+        <div class="gallery-overlay-text">
+          <h3>City Pulse</h3>
+          <span>Street</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gallery-item" data-category="nature" data-title="Morning Dew" data-cat-label="Nature">
+      <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=80" alt="Forest light" loading="lazy">
+      <div class="gallery-overlay">
+        <div class="gallery-overlay-text">
+          <h3>Morning Dew</h3>
+          <span>Nature</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gallery-item" data-category="landscape" data-title="Still Waters" data-cat-label="Landscape">
+      <img src="https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=800&q=80" alt="Lake reflection" loading="lazy">
+      <div class="gallery-overlay">
+        <div class="gallery-overlay-text">
+          <h3>Still Waters</h3>
+          <span>Landscape</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gallery-item" data-category="portrait" data-title="Into the Light" data-cat-label="Portrait">
+      <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&q=80" alt="Portrait" loading="lazy">
+      <div class="gallery-overlay">
+        <div class="gallery-overlay-text">
+          <h3>Into the Light</h3>
+          <span>Portrait</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gallery-item" data-category="street" data-title="Neon Nights" data-cat-label="Street">
+      <img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=600&q=80" alt="Neon street" loading="lazy">
+      <div class="gallery-overlay">
+        <div class="gallery-overlay-text">
+          <h3>Neon Nights</h3>
+          <span>Street</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gallery-item" data-category="nature" data-title="Petal Whisper" data-cat-label="Nature">
+      <img src="https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=600&q=80" alt="Flowers close up" loading="lazy">
+      <div class="gallery-overlay">
+        <div class="gallery-overlay-text">
+          <h3>Petal Whisper</h3>
+          <span>Nature</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gallery-item" data-category="landscape" data-title="Desert Silence" data-cat-label="Landscape">
+      <img src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=800&q=80" alt="Desert landscape" loading="lazy">
+      <div class="gallery-overlay">
+        <div class="gallery-overlay-text">
+          <h3>Desert Silence</h3>
+          <span>Landscape</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gallery-item" data-category="portrait" data-title="Soft Focus" data-cat-label="Portrait">
+      <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80" alt="Portrait" loading="lazy">
+      <div class="gallery-overlay">
+        <div class="gallery-overlay-text">
+          <h3>Soft Focus</h3>
+          <span>Portrait</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gallery-item" data-category="nature" data-title="Ocean Breath" data-cat-label="Nature">
+      <img src="https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800&q=80" alt="Ocean waves" loading="lazy">
+      <div class="gallery-overlay">
+        <div class="gallery-overlay-text">
+          <h3>Ocean Breath</h3>
+          <span>Nature</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gallery-item" data-category="street" data-title="Morning Commute" data-cat-label="Street">
+      <img src="https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=800&q=80" alt="City morning" loading="lazy">
+      <div class="gallery-overlay">
+        <div class="gallery-overlay-text">
+          <h3>Morning Commute</h3>
+          <span>Street</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About Section -->
+<section id="about">
+  <div class="section-header reveal">
+    <p class="section-label">The Photographer</p>
+    <h2 class="section-title">About</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="about reveal">
+    <p>
+      I believe photography is the art of finding beauty in the ordinary.
+      Through my lens, I seek to capture fleeting moments — the way light
+      dances across a face, the quiet stillness of an empty street at dawn,
+      the raw emotion in a single glance. Each photograph is a story
+      waiting to be told.
+    </p>
+    <p class="about-name">— Your Name</p>
+  </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact">
+  <div class="section-header reveal">
+    <p class="section-label">Get in Touch</p>
+    <h2 class="section-title">Contact</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="contact reveal">
+    <a href="mailto:hello@yourname.com">hello@yourname.com</a>
+    <div class="contact-socials">
+      <a href="#">Instagram</a>
+      <a href="#">Behance</a>
+      <a href="#">500px</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <p>&copy; 2026 Your Name. All Rights Reserved.</p>
+</footer>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" aria-label="Close"></button>
+  <button class="lightbox-nav lightbox-prev" aria-label="Previous">&#8592;</button>
+  <button class="lightbox-nav lightbox-next" aria-label="Next">&#8594;</button>
+  <img src="" alt="" id="lightboxImg">
+  <div class="lightbox-caption">
+    <h3 id="lightboxTitle"></h3>
+    <span id="lightboxCat"></span>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ===== NAV SCROLL =====
+  const nav = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 80);
+  });
+
+  // ===== MOBILE MENU =====
+  const menuToggle = document.getElementById('menuToggle');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  menuToggle.addEventListener('click', () => {
+    menuToggle.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+  });
+
+  mobileMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      menuToggle.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  // ===== GALLERY FILTER =====
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const galleryItems = document.querySelectorAll('.gallery-item');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+
+      galleryItems.forEach((item, i) => {
+        if (filter === 'all' || item.dataset.category === filter) {
+          item.classList.remove('hidden');
+          item.style.transitionDelay = (i * 0.05) + 's';
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+    });
+  });
+
+  // ===== LIGHTBOX =====
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxTitle = document.getElementById('lightboxTitle');
+  const lightboxCat = document.getElementById('lightboxCat');
+  let currentIndex = 0;
+  let visibleItems = [];
+
+  function getVisibleItems() {
+    return [...document.querySelectorAll('.gallery-item:not(.hidden)')];
+  }
+
+  function openLightbox(index) {
+    visibleItems = getVisibleItems();
+    currentIndex = index;
+    const item = visibleItems[currentIndex];
+    const img = item.querySelector('img');
+    lightboxImg.src = img.src.replace('w=600', 'w=1400').replace('w=800', 'w=1400');
+    lightboxImg.alt = img.alt;
+    lightboxTitle.textContent = item.dataset.title;
+    lightboxCat.textContent = item.dataset.catLabel;
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function navigate(dir) {
+    visibleItems = getVisibleItems();
+    currentIndex = (currentIndex + dir + visibleItems.length) % visibleItems.length;
+    const item = visibleItems[currentIndex];
+    const img = item.querySelector('img');
+    lightboxImg.src = img.src.replace('w=600', 'w=1400').replace('w=800', 'w=1400');
+    lightboxImg.alt = img.alt;
+    lightboxTitle.textContent = item.dataset.title;
+    lightboxCat.textContent = item.dataset.catLabel;
+  }
+
+  galleryItems.forEach((item, i) => {
+    item.addEventListener('click', () => {
+      const vis = getVisibleItems();
+      const idx = vis.indexOf(item);
+      openLightbox(idx >= 0 ? idx : 0);
+    });
+  });
+
+  lightbox.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+  lightbox.querySelector('.lightbox-prev').addEventListener('click', (e) => { e.stopPropagation(); navigate(-1); });
+  lightbox.querySelector('.lightbox-next').addEventListener('click', (e) => { e.stopPropagation(); navigate(1); });
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') navigate(-1);
+    if (e.key === 'ArrowRight') navigate(1);
+  });
+
+  // ===== SCROLL REVEAL =====
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add(entry.target.classList.contains('gallery-item') ? 'visible' : 'revealed');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal, .gallery-item').forEach((el, i) => {
+    if (el.classList.contains('gallery-item')) {
+      el.style.transitionDelay = (i * 0.08) + 's';
+    }
+    observer.observe(el);
+  });
+
+  // ===== ACTIVE NAV LINK =====
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(section => {
+      const top = section.offsetTop - 200;
+      if (window.scrollY >= top) current = section.getAttribute('id');
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
