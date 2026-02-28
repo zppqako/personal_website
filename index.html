@@ -73,6 +73,11 @@
     list-style: none;
   }
 
+  .nav-links li {
+    min-width: 52px;
+    text-align: center;
+  }
+
   .nav-links a {
     font-family: var(--sans);
     font-size: 0.78rem;
@@ -317,14 +322,14 @@
   .gallery {
     padding: 0 clamp(16px, 3vw, 48px);
     columns: 3;
-    column-gap: clamp(12px, 1.5vw, 20px);
+    column-gap: clamp(28px, 3.5vw, 52px);
     max-width: 1600px;
     margin: 0 auto;
   }
 
   .gallery-item {
     break-inside: avoid;
-    margin-bottom: clamp(12px, 1.5vw, 20px);
+    margin-bottom: clamp(28px, 3.5vw, 52px);
     position: relative;
     overflow: hidden;
     cursor: pointer;
@@ -608,7 +613,9 @@
     background: none;
     border: 1px solid rgba(0,0,0,0.15);
     border-radius: 2px;
-    padding: 4px 12px;
+    width: 52px;
+    padding: 4px 0;
+    text-align: center;
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
@@ -883,7 +890,7 @@
 
 <!-- Footer -->
 <footer>
-  <p data-zh="&copy; 2026 Your Name. 保留所有权利。">&copy; 2026 Your Name. All Rights Reserved.</p>
+  <p data-zh="&copy; 2026 Bill Sun. 保留所有权利。">&copy; 2026 Bill Sun. All Rights Reserved.</p>
 </footer>
 
 <!-- Lightbox -->
