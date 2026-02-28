@@ -191,6 +191,7 @@
     font-size: 0.82rem;
     font-weight: 300;
     letter-spacing: 0.2em;
+    text-indent: 0.2em;
     text-transform: uppercase;
     color: var(--fg-muted);
     margin-top: 24px;
@@ -202,8 +203,8 @@
   .scroll-indicator {
     position: absolute;
     bottom: 48px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -252,6 +253,7 @@
   .section-label {
     font-size: 0.7rem;
     letter-spacing: 0.2em;
+    text-indent: 0.2em;
     text-transform: uppercase;
     color: var(--fg-faint);
     margin-bottom: 16px;
@@ -354,35 +356,13 @@
   .gallery-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%);
+    background: rgba(0,0,0,0.15);
     opacity: 0;
     transition: opacity 0.5s var(--transition);
-    display: flex;
-    align-items: flex-end;
-    padding: 28px;
   }
 
   .gallery-item:hover .gallery-overlay {
     opacity: 1;
-  }
-
-  .gallery-overlay-text {
-    color: #fff;
-  }
-
-  .gallery-overlay-text h3 {
-    font-family: var(--serif);
-    font-size: 1.2rem;
-    font-weight: 300;
-    letter-spacing: 0.02em;
-    margin-bottom: 4px;
-  }
-
-  .gallery-overlay-text span {
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    opacity: 0.7;
   }
 
   /* ===== LIGHTBOX ===== */
@@ -464,28 +444,6 @@
   .lightbox-prev { left: 20px; }
   .lightbox-next { right: 20px; }
 
-  .lightbox-caption {
-    position: absolute;
-    bottom: 28px;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    color: rgba(255,255,255,0.6);
-  }
-
-  .lightbox-caption h3 {
-    font-family: var(--serif);
-    font-size: 1.1rem;
-    font-weight: 300;
-    margin-bottom: 2px;
-  }
-
-  .lightbox-caption span {
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
   /* ===== ABOUT ===== */
   .about {
     max-width: 720px;
@@ -507,9 +465,30 @@
     font-family: var(--sans);
     font-size: 0.72rem;
     letter-spacing: 0.15em;
+    text-indent: 0.15em;
     text-transform: uppercase;
     color: var(--fg-faint);
-    margin-top: 32px;
+    margin-top: 40px;
+  }
+
+  .about p + p {
+    margin-top: 28px;
+  }
+
+  .about-quote {
+    font-size: 1.5rem;
+    color: var(--fg);
+    margin-top: 52px;
+    margin-bottom: 52px;
+  }
+
+  .about-closing {
+    font-style: normal;
+    font-size: 1.05rem;
+    letter-spacing: 0.04em;
+    color: var(--fg);
+    margin-top: 48px;
+    line-height: 2;
   }
 
   /* ===== CONTACT ===== */
@@ -612,36 +591,67 @@
     opacity: 1;
     transform: translateY(0);
   }
+
+  /* ===== LANGUAGE TOGGLE ===== */
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .lang-toggle {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--fg-muted);
+    background: none;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 2px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    z-index: 200;
+  }
+
+  .lang-toggle:hover {
+    color: var(--fg);
+    border-color: var(--fg);
+  }
 </style>
 </head>
 <body>
 
 <!-- Navigation -->
 <nav id="navbar">
-  <a href="#" class="logo">Your Name</a>
-  <ul class="nav-links">
-    <li><a href="#gallery" class="active">Gallery</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-  <button class="menu-toggle" id="menuToggle" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
+  <a href="#" class="logo">Bill Sun</a>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#gallery" class="active" data-zh="作品集">Gallery</a></li>
+      <li><a href="#about" data-zh="关于">About</a></li>
+      <li><a href="#contact" data-zh="联系">Contact</a></li>
+    </ul>
+    <button class="lang-toggle" id="langToggle">中文</button>
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
 </nav>
 
 <!-- Mobile Menu -->
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#gallery">Gallery</a>
-  <a href="#about">About</a>
-  <a href="#contact">Contact</a>
+  <a href="#gallery" data-zh="作品集">Gallery</a>
+  <a href="#about" data-zh="关于">About</a>
+  <a href="#contact" data-zh="联系">Contact</a>
 </div>
 
 <!-- Hero -->
 <section class="hero">
-  <h1 class="hero-title">Moments<br><em>in Light</em></h1>
-  <p class="hero-subtitle">Photography Portfolio</p>
+  <h1 class="hero-title" data-zh-html="光影<br><em>瞬间</em>">Moments<br><em>in Light</em></h1>
+  <p class="hero-subtitle" data-zh="摄影作品集">Photography Portfolio</p>
   <div class="scroll-indicator">
-    <span>Scroll</span>
+    <span data-zh="向下滑动">Scroll</span>
     <div class="scroll-line"></div>
   </div>
 </section>
@@ -649,139 +659,188 @@
 <!-- Gallery Section -->
 <section id="gallery">
   <div class="section-header reveal">
-    <p class="section-label">Selected Work</p>
-    <h2 class="section-title">Gallery</h2>
+    <p class="section-label" data-zh="精选作品">Selected Work</p>
+    <h2 class="section-title" data-zh="作品集">Gallery</h2>
     <div class="section-divider"></div>
   </div>
 
   <div class="gallery-filters reveal">
-    <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="landscape">Landscape</button>
-    <button class="filter-btn" data-filter="portrait">Portrait</button>
-    <button class="filter-btn" data-filter="street">Street</button>
-    <button class="filter-btn" data-filter="nature">Nature</button>
+    <button class="filter-btn active" data-filter="all" data-zh="全部">All</button>
+    <button class="filter-btn" data-filter="landscape" data-zh="风景">Landscape</button>
+    <button class="filter-btn" data-filter="street" data-zh="街头">Street</button>
+    <button class="filter-btn" data-filter="nature" data-zh="自然">Nature</button>
   </div>
 
   <div class="gallery" id="galleryGrid">
-    <!-- Row 1 -->
-    <div class="gallery-item" data-category="landscape" data-title="Golden Hour" data-cat-label="Landscape">
-      <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80" alt="Mountain landscape" loading="lazy">
-      <div class="gallery-overlay">
-        <div class="gallery-overlay-text">
-          <h3>Golden Hour</h3>
-          <span>Landscape</span>
-        </div>
-      </div>
+    <div class="gallery-item" data-category="landscape">
+      <img src="images/landscape/DSCF3059.JPG" alt="Landscape" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="landscape">
+      <img src="images/landscape/DSCF3242.JPG" alt="Landscape" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="landscape">
+      <img src="images/landscape/DSCF3555.JPG" alt="Landscape" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="landscape">
+      <img src="images/landscape/DSCF3638-3.jpg" alt="Landscape" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="landscape">
+      <img src="images/landscape/DSCF3652.JPG" alt="Landscape" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="landscape">
+      <img src="images/landscape/DSCF3666.JPG" alt="Landscape" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="landscape">
+      <img src="images/landscape/DSCF3744.JPG" alt="Landscape" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="landscape">
+      <img src="images/landscape/DSCF3767.jpeg" alt="Landscape" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="landscape">
+      <img src="images/landscape/DSCF3842.JPG" alt="Landscape" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="landscape">
+      <img src="images/landscape/DSCF4204.jpg" alt="Landscape" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="landscape">
+      <img src="images/landscape/DSCF4221.JPG" alt="Landscape" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="landscape">
+      <img src="images/landscape/DSCF4808.jpeg" alt="Landscape" loading="lazy">
+      <div class="gallery-overlay"></div>
     </div>
 
-    <div class="gallery-item" data-category="portrait" data-title="Silent Gaze" data-cat-label="Portrait">
-      <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&q=80" alt="Portrait photography" loading="lazy">
-      <div class="gallery-overlay">
-        <div class="gallery-overlay-text">
-          <h3>Silent Gaze</h3>
-          <span>Portrait</span>
-        </div>
-      </div>
+    <div class="gallery-item" data-category="nature">
+      <img src="images/nature/DSCF0407 2.jpg" alt="Nature" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="nature">
+      <img src="images/nature/DSCF3293.JPG" alt="Nature" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="nature">
+      <img src="images/nature/DSCF3700.JPG" alt="Nature" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="nature">
+      <img src="images/nature/DSCF4087.jpg" alt="Nature" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="nature">
+      <img src="images/nature/DSCF4094.JPG" alt="Nature" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="nature">
+      <img src="images/nature/DSCF4104.JPG" alt="Nature" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="nature">
+      <img src="images/nature/DSCF4184.JPG" alt="Nature" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="nature">
+      <img src="images/nature/DSCF4784.jpeg" alt="Nature" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="nature">
+      <img src="images/nature/DSCF4792.JPG" alt="Nature" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="nature">
+      <img src="images/nature/DSCF4941.jpeg" alt="Nature" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="nature">
+      <img src="images/nature/DSCF4948.JPG" alt="Nature" loading="lazy">
+      <div class="gallery-overlay"></div>
     </div>
 
-    <div class="gallery-item" data-category="street" data-title="City Pulse" data-cat-label="Street">
-      <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80" alt="City street at night" loading="lazy">
-      <div class="gallery-overlay">
-        <div class="gallery-overlay-text">
-          <h3>City Pulse</h3>
-          <span>Street</span>
-        </div>
-      </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF2081.jpeg" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
     </div>
-
-    <div class="gallery-item" data-category="nature" data-title="Morning Dew" data-cat-label="Nature">
-      <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=80" alt="Forest light" loading="lazy">
-      <div class="gallery-overlay">
-        <div class="gallery-overlay-text">
-          <h3>Morning Dew</h3>
-          <span>Nature</span>
-        </div>
-      </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF3017.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
     </div>
-
-    <div class="gallery-item" data-category="landscape" data-title="Still Waters" data-cat-label="Landscape">
-      <img src="https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=800&q=80" alt="Lake reflection" loading="lazy">
-      <div class="gallery-overlay">
-        <div class="gallery-overlay-text">
-          <h3>Still Waters</h3>
-          <span>Landscape</span>
-        </div>
-      </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF3160.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
     </div>
-
-    <div class="gallery-item" data-category="portrait" data-title="Into the Light" data-cat-label="Portrait">
-      <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&q=80" alt="Portrait" loading="lazy">
-      <div class="gallery-overlay">
-        <div class="gallery-overlay-text">
-          <h3>Into the Light</h3>
-          <span>Portrait</span>
-        </div>
-      </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF3165.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
     </div>
-
-    <div class="gallery-item" data-category="street" data-title="Neon Nights" data-cat-label="Street">
-      <img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=600&q=80" alt="Neon street" loading="lazy">
-      <div class="gallery-overlay">
-        <div class="gallery-overlay-text">
-          <h3>Neon Nights</h3>
-          <span>Street</span>
-        </div>
-      </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF3250.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
     </div>
-
-    <div class="gallery-item" data-category="nature" data-title="Petal Whisper" data-cat-label="Nature">
-      <img src="https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=600&q=80" alt="Flowers close up" loading="lazy">
-      <div class="gallery-overlay">
-        <div class="gallery-overlay-text">
-          <h3>Petal Whisper</h3>
-          <span>Nature</span>
-        </div>
-      </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF3267.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
     </div>
-
-    <div class="gallery-item" data-category="landscape" data-title="Desert Silence" data-cat-label="Landscape">
-      <img src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=800&q=80" alt="Desert landscape" loading="lazy">
-      <div class="gallery-overlay">
-        <div class="gallery-overlay-text">
-          <h3>Desert Silence</h3>
-          <span>Landscape</span>
-        </div>
-      </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF3411.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
     </div>
-
-    <div class="gallery-item" data-category="portrait" data-title="Soft Focus" data-cat-label="Portrait">
-      <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80" alt="Portrait" loading="lazy">
-      <div class="gallery-overlay">
-        <div class="gallery-overlay-text">
-          <h3>Soft Focus</h3>
-          <span>Portrait</span>
-        </div>
-      </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF3429.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
     </div>
-
-    <div class="gallery-item" data-category="nature" data-title="Ocean Breath" data-cat-label="Nature">
-      <img src="https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800&q=80" alt="Ocean waves" loading="lazy">
-      <div class="gallery-overlay">
-        <div class="gallery-overlay-text">
-          <h3>Ocean Breath</h3>
-          <span>Nature</span>
-        </div>
-      </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF3483.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
     </div>
-
-    <div class="gallery-item" data-category="street" data-title="Morning Commute" data-cat-label="Street">
-      <img src="https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=800&q=80" alt="City morning" loading="lazy">
-      <div class="gallery-overlay">
-        <div class="gallery-overlay-text">
-          <h3>Morning Commute</h3>
-          <span>Street</span>
-        </div>
-      </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF3569.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF3659.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF3661.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF3732.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF3800.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF4529.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF4775.jpeg" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF4848.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF4882.JPG" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="street">
+      <img src="images/street/DSCF4937.jpeg" alt="Street" loading="lazy">
+      <div class="gallery-overlay"></div>
     </div>
   </div>
 </section>
@@ -789,44 +848,41 @@
 <!-- About Section -->
 <section id="about">
   <div class="section-header reveal">
-    <p class="section-label">The Photographer</p>
-    <h2 class="section-title">About</h2>
+    <p class="section-label" data-zh="关于摄影师">The Photographer</p>
+    <h2 class="section-title" data-zh="关于">About</h2>
     <div class="section-divider"></div>
   </div>
 
   <div class="about reveal">
-    <p>
-      I believe photography is the art of finding beauty in the ordinary.
-      Through my lens, I seek to capture fleeting moments — the way light
-      dances across a face, the quiet stillness of an empty street at dawn,
-      the raw emotion in a single glance. Each photograph is a story
-      waiting to be told.
-    </p>
-    <p class="about-name">— Your Name</p>
+    <p data-zh="我的日常，是与底层硬件、实时系统和没有容错率的代码打交道。那是一个由绝对逻辑构建的世界——精确、严苛，0 与 1 之间，没有灰色地带。">My days are built on bare-metal code, real-time systems, and hardware that demands absolute precision—a world where logic is the only currency.</p>
+    <p class="about-quote" data-zh="「我擅长感受，却拙于表达，于是我开始记录。」">"I feel deeply, but express clumsily—so I started recording."</p>
+    <p data-zh="镜头，成为了我另一种语言。">The camera became my other language.</p>
+    <p data-zh-html="这里没有编译错误，没有边界条件。<br>只有光的温度、街头的呼吸，和不需要注释的情感。">No compilation errors. No edge cases.<br>Just the warmth of light, the stillness between moments, and emotions that need no comment blocks.</p>
+    <p class="about-closing" data-zh-html="用代码构建逻辑。<br>用快门定格时间。">I build with logic.<br>I capture with light.</p>
+    <p class="about-name">— Bill</p>
   </div>
 </section>
 
 <!-- Contact Section -->
 <section id="contact">
   <div class="section-header reveal">
-    <p class="section-label">Get in Touch</p>
-    <h2 class="section-title">Contact</h2>
+    <p class="section-label" data-zh="联系方式">Get in Touch</p>
+    <h2 class="section-title" data-zh="联系">Contact</h2>
     <div class="section-divider"></div>
   </div>
 
   <div class="contact reveal">
-    <a href="mailto:hello@yourname.com">hello@yourname.com</a>
+    <a href="mailto:billsun37@gmail.com">billsun37@gmail.com</a>
     <div class="contact-socials">
-      <a href="#">Instagram</a>
-      <a href="#">Behance</a>
-      <a href="#">500px</a>
+      <a href="https://www.instagram.com/bi1l_sun/" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://www.linkedin.com/in/bill-sun9/" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </div>
 </section>
 
 <!-- Footer -->
 <footer>
-  <p>&copy; 2026 Your Name. All Rights Reserved.</p>
+  <p data-zh="&copy; 2026 Your Name. 保留所有权利。">&copy; 2026 Your Name. All Rights Reserved.</p>
 </footer>
 
 <!-- Lightbox -->
@@ -835,10 +891,6 @@
   <button class="lightbox-nav lightbox-prev" aria-label="Previous">&#8592;</button>
   <button class="lightbox-nav lightbox-next" aria-label="Next">&#8594;</button>
   <img src="" alt="" id="lightboxImg">
-  <div class="lightbox-caption">
-    <h3 id="lightboxTitle"></h3>
-    <span id="lightboxCat"></span>
-  </div>
 </div>
 
 <script>
@@ -891,8 +943,6 @@
   // ===== LIGHTBOX =====
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
-  const lightboxTitle = document.getElementById('lightboxTitle');
-  const lightboxCat = document.getElementById('lightboxCat');
   let currentIndex = 0;
   let visibleItems = [];
 
@@ -907,8 +957,6 @@
     const img = item.querySelector('img');
     lightboxImg.src = img.src.replace('w=600', 'w=1400').replace('w=800', 'w=1400');
     lightboxImg.alt = img.alt;
-    lightboxTitle.textContent = item.dataset.title;
-    lightboxCat.textContent = item.dataset.catLabel;
     lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
@@ -925,8 +973,6 @@
     const img = item.querySelector('img');
     lightboxImg.src = img.src.replace('w=600', 'w=1400').replace('w=800', 'w=1400');
     lightboxImg.alt = img.alt;
-    lightboxTitle.textContent = item.dataset.title;
-    lightboxCat.textContent = item.dataset.catLabel;
   }
 
   galleryItems.forEach((item, i) => {
@@ -979,6 +1025,42 @@
       link.classList.toggle('active', link.getAttribute('href') === '#' + current);
     });
   });
+
+  // ===== LANGUAGE TOGGLE =====
+  const langToggle = document.getElementById('langToggle');
+  let currentLang = localStorage.getItem('lang') || 'en';
+  const enTextStore = new Map();
+  const enHtmlStore = new Map();
+
+  document.querySelectorAll('[data-zh]').forEach(el => {
+    enTextStore.set(el, el.textContent);
+  });
+  document.querySelectorAll('[data-zh-html]').forEach(el => {
+    enHtmlStore.set(el, el.innerHTML);
+  });
+
+  function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    document.title = lang === 'zh' ? '作品集 — 摄影' : 'Portfolio \u2014 Photography';
+    langToggle.textContent = lang === 'zh' ? 'EN' : '\u4E2D\u6587';
+
+    document.querySelectorAll('[data-zh]').forEach(el => {
+      el.textContent = lang === 'zh' ? el.dataset.zh : enTextStore.get(el);
+    });
+
+    document.querySelectorAll('[data-zh-html]').forEach(el => {
+      el.innerHTML = lang === 'zh' ? el.dataset.zhHtml : enHtmlStore.get(el);
+    });
+
+  }
+
+  langToggle.addEventListener('click', () => {
+    setLanguage(currentLang === 'en' ? 'zh' : 'en');
+  });
+
+  if (currentLang === 'zh') setLanguage('zh');
 })();
 </script>
 
