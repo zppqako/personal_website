@@ -279,44 +279,6 @@
     margin: 24px auto 0;
   }
 
-  /* ===== GALLERY FILTERS ===== */
-  .gallery-filters {
-    display: flex;
-    justify-content: center;
-    gap: 32px;
-    padding: 0 24px 48px;
-    flex-wrap: wrap;
-  }
-
-  .filter-btn {
-    font-family: var(--sans);
-    font-size: 0.72rem;
-    font-weight: 400;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--fg-faint);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px 0;
-    position: relative;
-    transition: color 0.3s;
-  }
-
-  .filter-btn::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: var(--fg);
-    transition: width 0.4s var(--transition);
-  }
-
-  .filter-btn:hover,
-  .filter-btn.active { color: var(--fg); }
-  .filter-btn.active::after { width: 100%; }
 
   /* ===== MASONRY GALLERY ===== */
   .gallery {
@@ -580,8 +542,6 @@
       padding: 0 16px;
     }
 
-    .gallery-filters { gap: 20px; }
-
     .lightbox-nav { display: none; }
   }
 
@@ -671,182 +631,183 @@
     <div class="section-divider"></div>
   </div>
 
-  <div class="gallery-filters reveal">
-    <button class="filter-btn active" data-filter="all" data-zh="全部">All</button>
-    <button class="filter-btn" data-filter="landscape" data-zh="风景">Landscape</button>
-    <button class="filter-btn" data-filter="street" data-zh="街头">Street</button>
-    <button class="filter-btn" data-filter="nature" data-zh="自然">Nature</button>
-  </div>
-
   <div class="gallery" id="galleryGrid">
-    <div class="gallery-item" data-category="landscape">
-      <img src="images/landscape/DSCF3059.JPG" alt="Landscape" loading="lazy">
+    <div class="gallery-item">
+      <img src="images/DSCF5010.JPG" alt="Photo" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item">
+      <img src="images/DSCF5004.JPG" alt="Photo" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="landscape">
-      <img src="images/landscape/DSCF3242.JPG" alt="Landscape" loading="lazy">
+      <img src="images/DSCF3059.JPG" alt="Landscape" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="landscape">
-      <img src="images/landscape/DSCF3555.JPG" alt="Landscape" loading="lazy">
+      <img src="images/DSCF3242.JPG" alt="Landscape" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="landscape">
-      <img src="images/landscape/DSCF3638-3.jpg" alt="Landscape" loading="lazy">
+      <img src="images/DSCF3555.JPG" alt="Landscape" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="landscape">
-      <img src="images/landscape/DSCF3652.JPG" alt="Landscape" loading="lazy">
+      <img src="images/DSCF3638-3.jpg" alt="Landscape" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="landscape">
-      <img src="images/landscape/DSCF3666.JPG" alt="Landscape" loading="lazy">
+      <img src="images/DSCF3652.JPG" alt="Landscape" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="landscape">
-      <img src="images/landscape/DSCF3744.JPG" alt="Landscape" loading="lazy">
+      <img src="images/DSCF3666.JPG" alt="Landscape" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="landscape">
-      <img src="images/landscape/DSCF3767.jpeg" alt="Landscape" loading="lazy">
+      <img src="images/DSCF3744.JPG" alt="Landscape" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="landscape">
-      <img src="images/landscape/DSCF3842.JPG" alt="Landscape" loading="lazy">
+      <img src="images/DSCF3767.jpeg" alt="Landscape" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="landscape">
-      <img src="images/landscape/DSCF4204.jpg" alt="Landscape" loading="lazy">
+      <img src="images/DSCF3842.JPG" alt="Landscape" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="landscape">
-      <img src="images/landscape/DSCF4221.JPG" alt="Landscape" loading="lazy">
+      <img src="images/DSCF4204.jpg" alt="Landscape" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="landscape">
-      <img src="images/landscape/DSCF4808.jpeg" alt="Landscape" loading="lazy">
+      <img src="images/DSCF4221.JPG" alt="Landscape" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+    <div class="gallery-item" data-category="landscape">
+      <img src="images/DSCF4808.jpeg" alt="Landscape" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
 
     <div class="gallery-item" data-category="nature">
-      <img src="images/nature/DSCF0407 2.jpg" alt="Nature" loading="lazy">
+      <img src="images/DSCF0407 2.jpg" alt="Nature" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="nature">
-      <img src="images/nature/DSCF3293.JPG" alt="Nature" loading="lazy">
+      <img src="images/DSCF3293.JPG" alt="Nature" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="nature">
-      <img src="images/nature/DSCF3700.JPG" alt="Nature" loading="lazy">
+      <img src="images/DSCF3700.JPG" alt="Nature" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="nature">
-      <img src="images/nature/DSCF4087.jpg" alt="Nature" loading="lazy">
+      <img src="images/DSCF4087.jpg" alt="Nature" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="nature">
-      <img src="images/nature/DSCF4094.JPG" alt="Nature" loading="lazy">
+      <img src="images/DSCF4094.JPG" alt="Nature" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="nature">
-      <img src="images/nature/DSCF4104.JPG" alt="Nature" loading="lazy">
+      <img src="images/DSCF4104.JPG" alt="Nature" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="nature">
-      <img src="images/nature/DSCF4184.JPG" alt="Nature" loading="lazy">
+      <img src="images/DSCF4184.JPG" alt="Nature" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="nature">
-      <img src="images/nature/DSCF4784.jpeg" alt="Nature" loading="lazy">
+      <img src="images/DSCF4784.jpeg" alt="Nature" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="nature">
-      <img src="images/nature/DSCF4792.JPG" alt="Nature" loading="lazy">
+      <img src="images/DSCF4792.JPG" alt="Nature" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="nature">
-      <img src="images/nature/DSCF4941.jpeg" alt="Nature" loading="lazy">
+      <img src="images/DSCF4941.jpeg" alt="Nature" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="nature">
-      <img src="images/nature/DSCF4948.JPG" alt="Nature" loading="lazy">
+      <img src="images/DSCF4948.JPG" alt="Nature" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
 
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF2081.jpeg" alt="Street" loading="lazy">
+      <img src="images/DSCF2081.jpeg" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF3017.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF3017.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF3160.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF3160.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF3165.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF3165.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF3250.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF3250.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF3267.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF3267.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF3411.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF3411.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF3429.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF3429.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF3483.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF3483.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF3569.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF3569.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF3659.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF3659.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF3661.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF3661.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF3732.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF3732.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF3800.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF3800.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF4529.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF4529.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF4775.jpeg" alt="Street" loading="lazy">
+      <img src="images/DSCF4775.jpeg" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF4848.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF4848.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF4882.JPG" alt="Street" loading="lazy">
+      <img src="images/DSCF4882.JPG" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
     <div class="gallery-item" data-category="street">
-      <img src="images/street/DSCF4937.jpeg" alt="Street" loading="lazy">
+      <img src="images/DSCF4937.jpeg" alt="Street" loading="lazy">
       <div class="gallery-overlay"></div>
     </div>
   </div>
@@ -927,27 +888,6 @@
     });
   });
 
-  // ===== GALLERY FILTER =====
-  const filterBtns = document.querySelectorAll('.filter-btn');
-  const galleryItems = document.querySelectorAll('.gallery-item');
-
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const filter = btn.dataset.filter;
-
-      galleryItems.forEach((item, i) => {
-        if (filter === 'all' || item.dataset.category === filter) {
-          item.classList.remove('hidden');
-          item.style.transitionDelay = (i * 0.05) + 's';
-        } else {
-          item.classList.add('hidden');
-        }
-      });
-    });
-  });
-
   // ===== LIGHTBOX =====
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
@@ -983,6 +923,7 @@
     lightboxImg.alt = img.alt;
   }
 
+  const galleryItems = document.querySelectorAll('.gallery-item');
   galleryItems.forEach((item, i) => {
     item.addEventListener('click', () => {
       const vis = getVisibleItems();
