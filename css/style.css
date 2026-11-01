@@ -296,12 +296,13 @@ nav.scrolled {
   transform: translateY(0);
 }
 
-.gallery-item.hidden {
-  display: none;
+.gallery-item picture {
+  display: block;
 }
 
 .gallery-item img {
   width: 100%;
+  height: auto;
   display: block;
   transition: transform 0.8s var(--transition);
 }
