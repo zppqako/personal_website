@@ -4,21 +4,20 @@
 Usage:
   python scripts/process_photos.py                 # sync the "网站" album from Photos.app
   python scripts/process_photos.py --album NAME    # sync a different album
-  python scripts/process_photos.py --folder DIR    # import image files from a folder
   add --force to regenerate everything, --dry-run to only print what would happen
 
 Rules (see CLAUDE.md):
+  - The album is the only source: data/photos.json holds exactly the album's photos.
   - Display order is the album order reversed: the last photo in the album is shown first.
-  - Only album photos are shown. Every other entry (removed from the album, or imported
-    from a folder and not in the album) gets "hidden": true; its files are kept.
-  - If an album photo has the same id (file name without extension) as a folder entry,
-    it takes over that entry.
+  - A photo removed from the album is deleted from photos.json and photos/ (re-adding it
+    regenerates it). Files in photos/ that belong to no photo are deleted too.
+  - Titles come from the photo's title in Photos.app.
+  - photos/cover.jpg (share preview) is made from the first landscape photo on the page.
   - A photo that fails to export is skipped and reported; the rest of the sync still runs.
-  - "alt" is the only hand-edited field; the script never overwrites it.
 """
 
 import argparse
-import hashlib
+import io
 import json
 import re
 import subprocess
@@ -27,7 +26,7 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-from PIL import Image, ImageOps
+from PIL import Image, ImageCms, ImageOps
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_FILE = ROOT / "data" / "photos.json"
@@ -39,6 +38,8 @@ FALLBACK_SIZE = 1600            # long edge of the JPEG fallback
 WEBP_QUALITY = 82
 JPEG_QUALITY = 85
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".webp"}
+COVER_FILE = OUT_DIR / "cover.jpg"
+COVER_SIZE = (1200, 630)        # standard share-preview (Open Graph) size
 
 # HDR photos carry a gain map; these byte strings identify the formats we know.
 GAIN_MAP_MARKERS = (b"urn:iso:std:iso:ts:21496", b"hdrgainmap", b"HDRGainMap", b"hdrgm")
@@ -59,8 +60,8 @@ def save_data(data):
     DATA_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def new_entry(photo_id, source):
-    return {"id": photo_id, "source": source, "alt": {"en": "", "zh": ""}, "hidden": False}
+def new_entry(photo_id, uuid):
+    return {"id": photo_id, "source": {"type": "photos", "uuid": uuid}}
 
 
 # ---------- image processing ----------
@@ -92,6 +93,36 @@ def remove_outputs(photo_id):
     for p in OUT_DIR.iterdir():
         if own.fullmatch(p.name):
             p.unlink()
+
+
+def sweep_outputs(photos, dry_run):
+    """Delete files in photos/ that belong to no photo (removed photos, old leftovers)."""
+    expected = {COVER_FILE}
+    for e in photos:
+        expected.update(output_paths(e["id"], e.get("sizes", []), e.get("hdr")))
+    stray = sorted(p for p in OUT_DIR.iterdir() if p.is_file() and p not in expected)
+    for p in stray:
+        if not dry_run:
+            p.unlink()
+    return len(stray)
+
+
+def make_cover(photos, dry_run):
+    """photos/cover.jpg: 1200x630 crop of the first landscape photo, in sRGB for social apps."""
+    if not photos:
+        return None
+    chosen = next((e for e in photos if e["width"] > e["height"]), photos[0])
+    if dry_run:
+        return chosen["id"]
+    with Image.open(OUT_DIR / f"{chosen['id']}-{chosen['sizes'][-1]}.webp") as im:
+        icc = im.info.get("icc_profile")
+        im = im.convert("RGB")
+        if icc:
+            im = ImageCms.profileToProfile(im, ImageCms.ImageCmsProfile(io.BytesIO(icc)),
+                                           ImageCms.createProfile("sRGB"), outputMode="RGB")
+        ImageOps.fit(im, COVER_SIZE, Image.LANCZOS).save(COVER_FILE, "JPEG", quality=JPEG_QUALITY,
+                                                         optimize=True, progressive=True)
+    return chosen["id"]
 
 
 # ---------- HDR ----------
@@ -240,49 +271,6 @@ def apply_render(entry, src_path, fallback_exif=None):
     entry["exif"] = {k: v for k, v in exif.items() if v is not None}
 
 
-# ---------- folder import ----------
-
-def sha256(path):
-    h = hashlib.sha256()
-    with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(1 << 20), b""):
-            h.update(chunk)
-    return h.hexdigest()
-
-
-def import_folder(data, folder, force, dry_run):
-    folder = Path(folder).resolve()
-    files = sorted(p for p in folder.iterdir() if p.suffix.lower() in IMAGE_EXTS)
-    by_id = {e["id"]: e for e in data["photos"]}
-    stats = {"new": 0, "updated": 0, "skipped": 0}
-
-    for path in files:
-        photo_id = path.stem.replace(" ", "_")
-        digest = sha256(path)
-        entry = by_id.get(photo_id)
-        if entry and entry["source"].get("type") == "photos":
-            print(f"  跳过 {path.name}：已由照片 App 相簿管理")
-            stats["skipped"] += 1
-            continue
-        unchanged = entry and entry["source"].get("sha256") == digest and outputs_exist(entry)
-        if unchanged and not force:
-            stats["skipped"] += 1
-            continue
-
-        action = "更新" if entry else "新增"
-        print(f"  {action} {path.name}")
-        stats["updated" if entry else "new"] += 1
-        if dry_run:
-            continue
-        if not entry:
-            entry = new_entry(photo_id, {})
-            data["photos"].append(entry)
-            by_id[photo_id] = entry
-        entry["source"] = {"type": "folder", "file": path.name, "sha256": digest}
-        apply_render(entry, path)
-    return stats
-
-
 # ---------- Photos.app album sync ----------
 
 def photos_fingerprint(photo):
@@ -325,7 +313,7 @@ def export_from_photos(photo, tmpdir):
 
 def unique_id(base, uuid, by_id):
     entry = by_id.get(base)
-    if entry is None or entry["source"].get("type") == "folder" or entry["source"].get("uuid") == uuid:
+    if entry is None or entry["source"].get("uuid") == uuid:
         return base
     return f"{base}-{uuid[:6]}"
 
@@ -349,7 +337,7 @@ def sync_album(data, album_name, force, dry_run):
 
     by_uuid = {e["source"].get("uuid"): e for e in data["photos"] if e["source"].get("type") == "photos"}
     by_id = {e["id"]: e for e in data["photos"]}
-    stats = {"new": 0, "updated": 0, "skipped": 0, "hidden": 0, "failed": 0}
+    stats = {"new": 0, "updated": 0, "skipped": 0, "removed": 0, "failed": 0}
     ordered = []
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -358,11 +346,9 @@ def sync_album(data, album_name, force, dry_run):
             previous = by_uuid.get(photo.uuid)
             if previous is None:
                 photo_id = unique_id(Path(photo.original_filename).stem.replace(" ", "_"), photo.uuid, by_id)
-                previous = by_id.get(photo_id)  # a folder entry with the same name is taken over
-                entry = dict(previous) if previous else new_entry(photo_id, {})
-                entry["source"] = {"type": "photos", "uuid": photo.uuid}
+                entry = new_entry(photo_id, photo.uuid)
                 by_id[photo_id] = entry
-                status = "更新" if previous else "新增"
+                status = "新增"
             else:
                 entry = previous
                 unchanged = entry["source"].get("fingerprint") == fingerprint and outputs_exist(entry)
@@ -387,23 +373,20 @@ def sync_album(data, album_name, force, dry_run):
                 stats["new" if status == "新增" else "updated"] += 1
             else:
                 stats["skipped"] += 1
-            entry["hidden"] = False
+            title = (photo.title or "").strip()
+            if title:
+                entry["title"] = title
+            else:
+                entry.pop("title", None)
             ordered.append(entry)
 
-    in_album = {id(e) for e in ordered}
-    ordered_ids = {e["id"] for e in ordered}
-    rest = []
+    kept = {e["id"] for e in ordered}
     for e in data["photos"]:
-        if id(e) in in_album or e["id"] in ordered_ids:
-            continue
-        if not e.get("hidden"):
-            print(f"  下架 {e['id']}（不在相簿中）")
-            stats["hidden"] += 1
-            if not dry_run:
-                e["hidden"] = True
-        rest.append(e)
+        if e["id"] not in kept:
+            print(f"  删除 {e['id']}（已不在相簿中）")
+            stats["removed"] += 1
     if not dry_run:
-        data["photos"] = ordered[::-1] + rest  # newest addition (end of album) first
+        data["photos"] = ordered[::-1]  # newest addition (end of album) first
     return stats, len(ordered)
 
 
@@ -412,25 +395,21 @@ def sync_album(data, album_name, force, dry_run):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--album", default=DEFAULT_ALBUM, help=f"照片 App 相簿名（默认：{DEFAULT_ALBUM}）")
-    ap.add_argument("--folder", help="从文件夹导入，而不是从照片 App 同步")
     ap.add_argument("--force", action="store_true", help="全部重新生成")
     ap.add_argument("--dry-run", action="store_true", help="只显示会做什么，不写任何文件")
     args = ap.parse_args()
 
     data = load_data()
-    if args.folder:
-        print(f"从文件夹导入：{args.folder}")
-        stats = import_folder(data, args.folder, args.force, args.dry_run)
-        shown = sum(1 for e in data["photos"] if not e.get("hidden")) + (stats["new"] if args.dry_run else 0)
-    else:
-        print(f"同步照片 App 相簿：{args.album}")
-        stats, shown = sync_album(data, args.album, args.force, args.dry_run)
+    print(f"同步照片 App 相簿：{args.album}")
+    stats, shown = sync_album(data, args.album, args.force, args.dry_run)
 
     if not args.dry_run:
+        data["cover"] = make_cover(data["photos"], args.dry_run)
         save_data(data)
-    labels = {"new": "新增", "updated": "更新", "skipped": "未变", "hidden": "下架", "failed": "失败"}
+    stray = sweep_outputs(data["photos"], args.dry_run)
+    labels = {"new": "新增", "updated": "更新", "skipped": "未变", "removed": "删除", "failed": "失败"}
     print("完成：" + "，".join(f"{labels[k]} {v}" for k, v in stats.items()))
-    print(f"网站将显示 {shown} 张照片")
+    print(f"网站将显示 {shown} 张照片" + (f"；清理 photos/ 里不再使用的文件 {stray} 个" if stray else ""))
     if stats.get("failed"):
         print("有照片处理失败（见上面的 ✗），修好后再运行一次即可，已成功的不会重复处理。")
 
