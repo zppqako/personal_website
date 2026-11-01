@@ -419,10 +419,13 @@ nav.scrolled {
   vector-effect: non-scaling-stroke;
 }
 
-.lightbox-nav:hover,
 .lightbox-nav:focus-visible { color: #fff; outline: none; }
-.lightbox-prev:hover svg { transform: translateX(-6px); }
-.lightbox-next:hover svg { transform: translateX(6px); }
+
+@media (hover: hover) {
+  .lightbox-nav:hover { color: #fff; }
+  .lightbox-prev:hover svg { transform: translateX(-6px); }
+  .lightbox-next:hover svg { transform: translateX(6px); }
+}
 
 /* ===== CONTACT ===== */
 .contact {
@@ -507,9 +510,29 @@ footer p {
     padding: 0 16px;
   }
 
-  .lightbox { --lightbox-gutter: 16px; } /* arrows hidden, swipe instead */
-  .lightbox-nav { display: none; }
-  .lightbox-counter { top: 36px; left: 24px; }
+  /* Phones: no room beside the photo, so the arrows sit in a bar below it:
+     ←  12 / 52  →   (swiping left/right works too) */
+  .lightbox { --lightbox-gutter: 16px; }
+  .lightbox img {
+    max-height: calc(100vh - 230px);
+    max-height: calc(100svh - 230px); /* room for the close button above and the bar below */
+  }
+  .lightbox-nav {
+    top: auto;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    width: 72px;
+    height: 56px;
+  }
+  .lightbox-prev { left: calc(50% - 124px); }
+  .lightbox-next { right: calc(50% - 124px); }
+  .lightbox-counter {
+    top: auto;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    left: 0;
+    right: 0;
+    line-height: 56px;
+    pointer-events: none;
+  }
   .lightbox-caption { padding: 0 16px; }
 }
 
