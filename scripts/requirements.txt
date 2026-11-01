@@ -1,0 +1,2 @@
+osxphotos==0.77.2
+Pillow==12.3.0
