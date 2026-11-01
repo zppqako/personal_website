@@ -134,3 +134,6 @@ About 区块已于 2026-11 删除。
 ## 已知问题和待办
 
 - 网址改名：等用户改完 GitHub 用户名、仓库改名为 `<新用户名>.github.io` 后，按上面「改地址时要改的地方」更新。
+- 2026-11-02 已用 git filter-repo 清理历史中的原图（`images/`）、下架照片和 `.DS_Store`，并 force push。但 GitHub 仍缓存旧提交（例如 `e00bbf9`，知道编号就能打开）。彻底清除的办法：改名时新建 `<新用户名>.github.io` 仓库，推送后删除旧仓库；或者联系 GitHub Support 要求清除缓存。
+- 清理前的完整历史备份（含原图）在 `/Users/Bill/personal_website-完整历史备份-2026-11-02.bundle`，只在本机。
+- 本地还有 6 个与本项目无关的标签（`0.8.0`–`v0.8.4`，来自 academicpages Jekyll 模板），约 53 MB，只在本机，从未推送。
