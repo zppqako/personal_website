@@ -242,6 +242,36 @@
       }
     },
     {
+      "id": "DSCF5004",
+      "source": {
+        "type": "photos",
+        "uuid": "71BFB191-2B0F-46E3-8032-D0CEABE84780",
+        "fingerprint": "original"
+      },
+      "alt": {
+        "en": "",
+        "zh": ""
+      },
+      "hidden": false,
+      "width": 5152,
+      "height": 7728,
+      "sizes": [
+        400,
+        800,
+        1600,
+        2400
+      ],
+      "takenAt": "2026-04-11T20:21:10",
+      "exif": {
+        "camera": "FUJIFILM X-T5",
+        "lens": "XF35mmF1.4 R\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+        "focalLength": 35,
+        "shutter": "1/110",
+        "iso": 500,
+        "aperture": 1.8
+      }
+    },
+    {
       "id": "DSCF5010",
       "source": {
         "type": "photos",
@@ -272,10 +302,10 @@
       }
     },
     {
-      "id": "DSCF5004",
+      "id": "DSCF4992",
       "source": {
         "type": "photos",
-        "uuid": "71BFB191-2B0F-46E3-8032-D0CEABE84780",
+        "uuid": "A0CC7AF1-2D6C-41B6-8D25-795DA58F7E59",
         "fingerprint": "original"
       },
       "alt": {
@@ -291,14 +321,14 @@
         1600,
         2400
       ],
-      "takenAt": "2026-04-11T20:21:10",
+      "takenAt": "2026-04-11T20:18:07",
       "exif": {
-        "camera": "FUJIFILM X-T5",
         "lens": "XF35mmF1.4 R\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
-        "focalLength": 35,
-        "shutter": "1/110",
         "iso": 500,
-        "aperture": 1.8
+        "camera": "FUJIFILM X-T5",
+        "aperture": 2,
+        "focalLength": 35,
+        "shutter": "1/150"
       }
     },
     {
@@ -479,6 +509,36 @@
         "shutter": "1/900",
         "iso": 400,
         "aperture": 5
+      }
+    },
+    {
+      "id": "DSCF4792",
+      "source": {
+        "type": "photos",
+        "uuid": "CF07512A-805B-437D-AE44-59DDD4C0C1B1",
+        "fingerprint": "edited@2025-10-17T06:40:12.030909+08:00"
+      },
+      "alt": {
+        "en": "",
+        "zh": ""
+      },
+      "hidden": false,
+      "width": 3587,
+      "height": 6050,
+      "sizes": [
+        400,
+        800,
+        1600,
+        2400
+      ],
+      "takenAt": "2025-10-16T16:06:18",
+      "exif": {
+        "lens": "XF35mmF1.4 R",
+        "iso": 400,
+        "camera": "FUJIFILM X-T5",
+        "aperture": 4,
+        "focalLength": 35,
+        "shutter": "1/550"
       }
     },
     {
@@ -1583,36 +1643,6 @@
       ],
       "takenAt": null,
       "exif": {}
-    },
-    {
-      "id": "DSCF4792",
-      "source": {
-        "type": "folder",
-        "file": "DSCF4792.JPG",
-        "sha256": "c1ca0cfc284635cb5b586c6297deabcdd9b8e2b863441175e39b2b77b30ac3da"
-      },
-      "alt": {
-        "en": "",
-        "zh": ""
-      },
-      "hidden": true,
-      "width": 3587,
-      "height": 6050,
-      "sizes": [
-        400,
-        800,
-        1600,
-        2400
-      ],
-      "takenAt": "2025-10-16T16:06:18",
-      "exif": {
-        "camera": "FUJIFILM X-T5",
-        "lens": "XF35mmF1.4 R",
-        "focalLength": 35,
-        "aperture": 4,
-        "shutter": "1/550",
-        "iso": 400
-      }
     },
     {
       "id": "DSCF3165",
