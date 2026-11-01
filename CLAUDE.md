@@ -16,6 +16,7 @@ js/main.js              全部交互；读取 data/photos.json 渲染图库
 data/photos.json        照片数据（脚本生成，alt 可手改）
 photos/                 网页用图片（脚本生成，提交到 git）
 scripts/process_photos.py  照片处理/同步脚本
+scripts/hdr_gainmap.swift  HDR 辅助程序（macOS 自带 Core Image），首次使用时编译到 .venv/bin/hdr_gainmap
 scripts/requirements.txt   Python 依赖（osxphotos、Pillow）
 update.sh               一键：同步相簿 → 生成图片 → 本地预览
 originals/              旧的原图备份（gitignore，不进仓库，网站不使用）
@@ -68,13 +69,16 @@ originals/              旧的原图备份（gitignore，不进仓库，网站�
 - `hidden`：由同步脚本维护。在相簿里为 `false`，不在相簿里为 `true`。
 - `width`/`height`：已按 EXIF 方向转正后的原图尺寸，页面用它预留比例。
 - `sizes`：实际生成的长边尺寸。原图比 2400 小时只生成到原图尺寸。
-- `exif`：页面目前不显示，留作以后用。没有的字段直接省略。
+- `exif`：大图下方的参数说明用它生成。没有的字段直接省略。
+- `hdr`：只有 HDR 照片才有，值为 `true`（脚本检测到原图带增益图时设置）。页面据此改用 `-hdr.jpg`。
 
 ## 图片规则（photos/）
 
 - `{id}-{长边}.webp`：长边 400/800/1600/2400，质量 82，用作网格 srcset 和 lightbox（取最大那档）。
 - `{id}.jpg`：长边 1600，质量 85，渐进式，作为不支持 WebP 时的兜底。
 - 先按 EXIF 方向把像素转正；**保留原 ICC 色彩配置**（大部分是 Display P3，去掉会发灰）；**去掉所有其他元数据，包括 GPS**。
+- `{id}-{长边}-hdr.jpg`：只有 HDR 照片才生成。主图是普通版本，外加 ISO 21496-1 标准增益图。HDR 屏幕和支持的浏览器显示 HDR，其余显示普通版本。WebP 装不下 HDR，所以 HDR 照片在页面上用这组 JPEG 代替 WebP。
+- HDR 检测：原图里有增益图标记（Apple、ISO 21496-1、Ultra HDR 任一）就算 HDR。生成由 `scripts/hdr_gainmap.swift` 完成：用 Core Image 读出 HDR，缩放后写 JPEG，同样去掉 EXIF/GPS、保留色彩配置。没有 Swift 编译器时会自动退回只生成普通版本。
 - 不要手动往 `photos/` 里放文件或改文件名。一律通过脚本生成。
 
 ## 设计原则
@@ -86,6 +90,7 @@ originals/              旧的原图备份（gitignore，不进仓库，网站�
 - 字体：标题用 Cormorant Garamond（衬线，细），正文和导航用 DM Sans（无衬线，细，大写加字距），从 Google Fonts 加载。
 - 图库：瀑布流，**从左到右阅读**（第一行是第 1、2、3 张）。>1024px 3 列，481–1024px 2 列，≤480px 1 列。最大宽度 1600px。
 - 动效：照片进入视野时淡入并轻微上移，曲线 `--transition`。同一批进入视野的照片按阅读顺序依次错开 0.08s，每批重新计时，所以页面再长，照片出现也不会越来越慢。
+- HDR：网格里用 `dynamic-range-limit: constrained` 压住 HDR 高光，不和周围照片抢；点开大图用 `no-limit` 完全放开。不支持这个属性的浏览器会忽略它。
 - 大图（lightbox）：深色背景；左上角计数 `12 / 52`；照片下方一行小字参数（相机 · 镜头 · 焦距 · 光圈 · 快门 · ISO），像美术馆的展签。左右箭头是 1px 细线 SVG（和页面上的细分隔线一致），悬停变白并向外滑动 6px。箭头放在左右两侧预留的通道里（`--lightbox-gutter`），照片最大宽度会扣掉两侧通道，所以再宽的照片也不会挡住箭头；整条通道都可以点击。手机上隐藏箭头，通道缩到 16px，改为左右滑动翻页。
 - 中英双语：元素上用 `data-zh` 或 `data-zh-html` 写中文，英文直接写在 HTML 里，右上角切换，选择存在 localStorage。新增文字时两种语言都要写。
 

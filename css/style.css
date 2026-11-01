@@ -261,6 +261,7 @@ nav.scrolled {
   width: 100%;
   height: auto;
   display: block;
+  dynamic-range-limit: constrained; /* HDR photos stay calm next to the others */
 }
 
 /* ===== LIGHTBOX ===== */
@@ -302,6 +303,7 @@ nav.scrolled {
   max-height: 82vh;
   object-fit: contain;
   display: block;
+  dynamic-range-limit: no-limit; /* full HDR when viewing one photo */
 }
 
 .lightbox-caption,

@@ -53,16 +53,19 @@
   function renderGallery(photos) {
     photos.filter(photo => !photo.hidden).forEach(photo => {
       const base = 'photos/' + photo.id;
+      // HDR photos use JPEG + gain map (WebP cannot carry HDR); the rest use WebP.
+      const file = size => photo.hdr ? `${base}-${size}-hdr.jpg` : `${base}-${size}.webp`;
+      const srcset = photo.sizes.map(size => `${file(size)} ${photoWidth(photo, size)}w`).join(', ');
       const item = document.createElement('div');
       item.className = 'gallery-item';
-      item.dataset.full = base + '-' + photo.sizes[photo.sizes.length - 1] + '.webp';
+      item.dataset.full = file(photo.sizes[photo.sizes.length - 1]);
       item.dataset.ratio = photo.height / photo.width;
       item.dataset.caption = captionFor(photo.exif);
 
       const picture = document.createElement('picture');
       const source = document.createElement('source');
-      source.type = 'image/webp';
-      source.srcset = photo.sizes.map(s => `${base}-${s}.webp ${photoWidth(photo, s)}w`).join(', ');
+      source.type = photo.hdr ? 'image/jpeg' : 'image/webp';
+      source.srcset = srcset;
       source.sizes = GALLERY_SIZES;
       const img = document.createElement('img');
       img.src = base + '.jpg';

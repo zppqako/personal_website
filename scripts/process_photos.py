@@ -20,6 +20,7 @@ Rules (see CLAUDE.md):
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -38,6 +39,11 @@ FALLBACK_SIZE = 1600            # long edge of the JPEG fallback
 WEBP_QUALITY = 82
 JPEG_QUALITY = 85
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".webp"}
+
+# HDR photos carry a gain map; these byte strings identify the formats we know.
+GAIN_MAP_MARKERS = (b"urn:iso:std:iso:ts:21496", b"hdrgainmap", b"HDRGainMap", b"hdrgm")
+HDR_HELPER_SRC = ROOT / "scripts" / "hdr_gainmap.swift"
+HDR_HELPER_BIN = ROOT / ".venv" / "bin" / "hdr_gainmap"
 
 
 # ---------- data file ----------
@@ -67,21 +73,59 @@ def target_sizes(long_edge):
     return sizes
 
 
-def output_paths(photo_id, sizes):
+def output_paths(photo_id, sizes, hdr=False):
     paths = [OUT_DIR / f"{photo_id}-{s}.webp" for s in sizes]
     paths.append(OUT_DIR / f"{photo_id}.jpg")
+    if hdr:
+        paths += [OUT_DIR / f"{photo_id}-{s}-hdr.jpg" for s in sizes]
     return paths
 
 
 def outputs_exist(entry):
     sizes = entry.get("sizes")
-    return bool(sizes) and all(p.exists() for p in output_paths(entry["id"], sizes))
+    return bool(sizes) and all(p.exists() for p in output_paths(entry["id"], sizes, entry.get("hdr")))
 
 
 def remove_outputs(photo_id):
-    for p in OUT_DIR.glob(f"{photo_id}-*.webp"):
-        p.unlink()
-    (OUT_DIR / f"{photo_id}.jpg").unlink(missing_ok=True)
+    # Exact pattern, so removing "DSCF3638" leaves "DSCF3638-3" alone.
+    own = re.compile(rf"{re.escape(photo_id)}(-\d+\.webp|-\d+-hdr\.jpg|\.jpg)")
+    for p in OUT_DIR.iterdir():
+        if own.fullmatch(p.name):
+            p.unlink()
+
+
+# ---------- HDR ----------
+
+def has_gain_map(path):
+    data = Path(path).read_bytes()
+    return any(m in data for m in GAIN_MAP_MARKERS)
+
+
+def hdr_helper():
+    """Path to the compiled Swift helper, building it if needed; None if Swift is unavailable."""
+    if HDR_HELPER_BIN.exists() and HDR_HELPER_BIN.stat().st_mtime >= HDR_HELPER_SRC.stat().st_mtime:
+        return HDR_HELPER_BIN
+    print("  编译 HDR 辅助程序（只在第一次或脚本更新后进行）…", flush=True)
+    try:
+        subprocess.run(["swiftc", "-O", str(HDR_HELPER_SRC), "-o", str(HDR_HELPER_BIN)],
+                       check=True, capture_output=True, text=True)
+    except (FileNotFoundError, subprocess.CalledProcessError) as err:
+        print(f"    ✗ 无法编译（{getattr(err, 'stderr', '') or err}），HDR 照片将只生成普通版本")
+        return None
+    return HDR_HELPER_BIN
+
+
+def render_hdr(src_path, photo_id, sizes):
+    """Write {id}-{size}-hdr.jpg (normal image + ISO 21496-1 gain map). Returns True on success."""
+    helper = hdr_helper()
+    if not helper:
+        return False
+    result = subprocess.run([str(helper), str(src_path), str(OUT_DIR / photo_id), str(JPEG_QUALITY / 100),
+                             *map(str, sizes)], capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"    ✗ HDR 版本生成失败：{result.stderr.strip()}，只保留普通版本")
+        return False
+    return True
 
 
 def resized(im, long_edge):
@@ -93,7 +137,7 @@ def resized(im, long_edge):
 
 
 def render(src_path, photo_id):
-    """Write all web versions of src_path. Returns (width, height, sizes, exif)."""
+    """Write all web versions of src_path. Returns (width, height, sizes, exif, hdr)."""
     with Image.open(src_path) as raw:
         exif = read_exif(raw)
         icc = raw.info.get("icc_profile")
@@ -113,7 +157,8 @@ def render(src_path, photo_id):
     resized(im, FALLBACK_SIZE).save(OUT_DIR / f"{photo_id}.jpg", "JPEG",
                                     quality=JPEG_QUALITY, optimize=True, progressive=True,
                                     icc_profile=icc)
-    return w, h, sizes, exif
+    hdr = has_gain_map(src_path) and render_hdr(src_path, photo_id, sizes)
+    return w, h, sizes, exif, hdr
 
 
 # ---------- EXIF ----------
@@ -183,10 +228,14 @@ def exif_from_photos(photo):
 
 
 def apply_render(entry, src_path, fallback_exif=None):
-    w, h, sizes, exif = render(src_path, entry["id"])
+    w, h, sizes, exif, hdr = render(src_path, entry["id"])
     if fallback_exif:
         exif = {k: exif.get(k) or fallback_exif.get(k) for k in set(exif) | set(fallback_exif)}
     entry["width"], entry["height"], entry["sizes"] = w, h, sizes
+    if hdr:
+        entry["hdr"] = True
+    else:
+        entry.pop("hdr", None)
     entry["takenAt"] = exif.pop("takenAt", None)
     entry["exif"] = {k: v for k, v in exif.items() if v is not None}
 
