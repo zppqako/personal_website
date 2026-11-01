@@ -4,6 +4,7 @@
 
 - 线上地址：https://zppqako.github.io/personal_website/（用户准备改 GitHub 用户名并把仓库改名为 `<新用户名>.github.io`，地址会变成 `https://<新用户名>.github.io/`，见下方「改地址时要改的地方」）
 - 照片来源：Mac「照片」App 里的相簿 **「网站」**。**相簿是唯一来源**：相簿里有什么，网站就显示什么；**相簿倒序显示**（相簿最后一张在网站第一位，也就是新加的在最前面）。
+- Instagram：`sun9_0237`（2026-11 起，之前是 `bi1l_sun`）。
 - 署名：网站上统一用 **SUN**（全大写、宽字距的衬线字标；logo、页脚、标签页标题 `SUN — Photography`），不写全名。
 
 ## 目录结构
@@ -114,6 +115,7 @@ About 区块已于 2026-11 删除。
 - 照片导出（`export_from_photos`）：本地有可读的文件（编辑过的照片用编辑版，没编辑过用原片）就直接读取；否则用 AppleScript 让照片 App 导出当前版本（会自动下载 iCloud 原片，HEIC/DNG 会转成 JPEG）。osxphotos 只用来读图库数据库，不用它导出，因为它的 iCloud 下载在这里拿不到任何文件，也不报错。
 - 单张照片导出失败时会跳过它（已有的旧版本保留），其余照片照常处理，结尾列出失败的照片。再跑一次即可，已成功的不会重复处理。
 - 本地预览必须走 HTTP 服务器（`./update.sh` 或 `python3 -m http.server`）。**直接双击打开 index.html 图库会是空的**，因为 file:// 下 fetch 读不了 JSON。
+- 用手机预览：手机和 Mac 连同一个 Wi-Fi，用 Mac 的局域网 IP 访问（`ipconfig getifaddr en0`），例如 `http://192.168.50.34:8080`。**不要把项目目录直接开放到局域网**，因为 `originals/` 里有原图，同一 Wi-Fi 下的人都能浏览。做法是先导出一份只含网站文件的副本（`git archive HEAD | tar -x -C <临时目录>`），在那个目录里运行 `python3 -m http.server 8080 --bind 0.0.0.0`。副本是导出那一刻的快照，改动后要重新导出。
 
 ## 改地址时要改的地方
 
