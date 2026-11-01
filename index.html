@@ -4,7 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SUN — Photography</title>
+<meta name="description" content="Photography by SUN — moments in light. 摄影作品集。">
+<meta name="theme-color" content="#f5f5f5">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<!-- Share previews (WeChat, iMessage, Instagram, X …). Absolute URLs: update them when the site address changes. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SUN">
+<meta property="og:title" content="SUN — Photography">
+<meta property="og:description" content="Moments in light. 摄影作品集。">
+<meta property="og:url" content="https://zppqako.github.io/personal_website/">
+<meta property="og:image" content="https://zppqako.github.io/personal_website/photos/cover.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="data/photos.json" as="fetch" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -67,7 +80,7 @@
 </footer>
 
 <!-- Lightbox -->
-<div class="lightbox" id="lightbox">
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer" aria-hidden="true">
   <p class="lightbox-counter" id="lightboxCounter"></p>
   <button class="lightbox-close" aria-label="Close"></button>
   <button class="lightbox-nav lightbox-prev" aria-label="Previous">
@@ -78,7 +91,10 @@
   </button>
   <figure class="lightbox-figure">
     <img src="" alt="" id="lightboxImg">
-    <figcaption class="lightbox-caption" id="lightboxCaption"></figcaption>
+    <figcaption>
+      <p class="lightbox-title" id="lightboxTitle"></p>
+      <p class="lightbox-caption" id="lightboxCaption"></p>
+    </figcaption>
   </figure>
 </div>
 

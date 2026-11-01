@@ -253,6 +253,11 @@ nav.scrolled {
   transform: translateY(0);
 }
 
+.gallery-item:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 6px;
+}
+
 .gallery-item picture {
   display: block;
 }
@@ -276,13 +281,15 @@ nav.scrolled {
   align-items: center;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.4s var(--transition);
+  /* hide only after the fade-out; show at once on open so the close button can take focus */
+  transition: opacity 0.4s var(--transition), visibility 0s linear 0.4s;
   cursor: zoom-out;
 }
 
 .lightbox.active {
   opacity: 1;
   visibility: visible;
+  transition: opacity 0.4s var(--transition), visibility 0s;
 }
 
 .lightbox-figure {
@@ -304,6 +311,25 @@ nav.scrolled {
   object-fit: contain;
   display: block;
   dynamic-range-limit: no-limit; /* full HDR when viewing one photo */
+  transition: opacity 0.25s;
+}
+
+.lightbox.loading img {
+  opacity: 0.35; /* next photo still downloading */
+}
+
+.lightbox-title {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.85);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.lightbox-title:empty {
+  display: none;
 }
 
 .lightbox-caption,
@@ -352,7 +378,10 @@ nav.scrolled {
 .lightbox-close::before { transform: rotate(45deg); }
 .lightbox-close::after { transform: rotate(-45deg); }
 .lightbox-close:hover::before,
-.lightbox-close:hover::after { background: #fff; }
+.lightbox-close:hover::after,
+.lightbox-close:focus-visible::before,
+.lightbox-close:focus-visible::after { background: #fff; }
+.lightbox-close:focus-visible { outline: none; }
 
 /* Hairline arrows in their own gutters: the whole gutter is the click target,
    and the photo is sized so it can never cover them. */

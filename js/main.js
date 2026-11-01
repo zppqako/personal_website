@@ -50,16 +50,24 @@
     ].filter(Boolean).map(part => String(part).replace(/ /g, '\u00a0')).join('  \u00b7  '); // wrap only between parts
   }
 
+  const EAGER_COUNT = 3; // first row on desktop: load immediately, not lazily
+
   function renderGallery(photos) {
-    photos.filter(photo => !photo.hidden).forEach(photo => {
+    photos.forEach((photo, index) => {
       const base = 'photos/' + photo.id;
       // HDR photos use JPEG + gain map (WebP cannot carry HDR); the rest use WebP.
       const file = size => photo.hdr ? `${base}-${size}-hdr.jpg` : `${base}-${size}.webp`;
       const srcset = photo.sizes.map(size => `${file(size)} ${photoWidth(photo, size)}w`).join(', ');
+      const label = photo.title || 'Photograph';
       const item = document.createElement('div');
       item.className = 'gallery-item';
+      item.tabIndex = 0;
+      item.setAttribute('role', 'button');
+      item.setAttribute('aria-label', label);
+      item.dataset.id = photo.id;
       item.dataset.full = file(photo.sizes[photo.sizes.length - 1]);
       item.dataset.ratio = photo.height / photo.width;
+      item.dataset.title = photo.title || '';
       item.dataset.caption = captionFor(photo.exif);
 
       const picture = document.createElement('picture');
@@ -71,8 +79,12 @@
       img.src = base + '.jpg';
       img.width = photo.width;
       img.height = photo.height;
-      img.alt = (photo.alt && (photo.alt.en || photo.alt.zh)) || 'Photo';
-      img.loading = 'lazy';
+      img.alt = label;
+      if (index < EAGER_COUNT) {
+        img.fetchPriority = 'high';
+      } else {
+        img.loading = 'lazy';
+      }
       picture.append(source, img);
       item.appendChild(picture);
       galleryItems.push(item);
@@ -134,40 +146,109 @@
   window.addEventListener('resize', layoutGallery);
 
   // ===== LIGHTBOX =====
+  // Each open photo gets its own address (#DSCF5010): links to a single photo work,
+  // and the phone's back button closes the viewer instead of leaving the site.
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxTitle = document.getElementById('lightboxTitle');
   const lightboxCaption = document.getElementById('lightboxCaption');
   const lightboxCounter = document.getElementById('lightboxCounter');
-  let currentIndex = 0;
+  let currentIndex = -1;
+  let returnFocus = null;
 
-  function showInLightbox(index) {
+  function preload(index) {
+    const item = galleryItems[(index + galleryItems.length) % galleryItems.length];
+    if (item) new Image().src = item.dataset.full;
+  }
+
+  function showPhoto(index) {
+    currentIndex = index;
     const item = galleryItems[index];
-    lightboxImg.src = item.dataset.full;
+    const text = () => {
+      lightboxTitle.textContent = item.dataset.title;
+      lightboxCaption.textContent = item.dataset.caption;
+      lightboxCounter.textContent = (index + 1) + ' / ' + galleryItems.length;
+      lightbox.classList.remove('loading');
+    };
+    if (lightboxImg.getAttribute('src') === item.dataset.full && lightboxImg.complete) {
+      text();
+    } else {
+      // keep text and picture in step: swap the text once the new picture is ready
+      lightbox.classList.add('loading');
+      lightboxImg.onload = lightboxImg.onerror = text;
+      lightboxImg.src = item.dataset.full;
+    }
     lightboxImg.alt = item.querySelector('img').alt;
-    lightboxCaption.textContent = item.dataset.caption;
-    lightboxCounter.textContent = (index + 1) + ' / ' + galleryItems.length;
+    preload(index + 1);
+    preload(index - 1);
+  }
+
+  function openViewer(index) {
+    if (!lightbox.classList.contains('active')) {
+      returnFocus = document.activeElement;
+      lightbox.classList.add('active');
+      lightbox.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      lightbox.querySelector('.lightbox-close').focus({ preventScroll: true });
+    }
+    showPhoto(index);
+  }
+
+  function hideViewer() {
+    if (!lightbox.classList.contains('active')) return;
+    lightbox.classList.remove('active');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    currentIndex = -1;
+    if (returnFocus) returnFocus.focus({ preventScroll: true });
+  }
+
+  function photoHref(index) {
+    return location.pathname + location.search + '#' + encodeURIComponent(galleryItems[index].dataset.id);
   }
 
   function openLightbox(index) {
-    currentIndex = index;
-    showInLightbox(currentIndex);
-    lightbox.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    history.pushState({ photo: true, pushed: true }, '', photoHref(index));
+    openViewer(index);
   }
 
   function closeLightbox() {
-    lightbox.classList.remove('active');
-    document.body.style.overflow = '';
+    if (history.state && history.state.pushed) {
+      history.back(); // popstate hides the viewer
+    } else {
+      // opened from a shared link: drop the #photo without leaving the site
+      history.replaceState(null, '', location.pathname + location.search);
+      hideViewer();
+    }
   }
 
   function navigate(dir) {
-    currentIndex = (currentIndex + dir + galleryItems.length) % galleryItems.length;
-    showInLightbox(currentIndex);
+    const index = (currentIndex + dir + galleryItems.length) % galleryItems.length;
+    history.replaceState({ ...history.state, photo: true }, '', photoHref(index));
+    showPhoto(index);
   }
+
+  function indexFromHash() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    return galleryItems.findIndex(item => item.dataset.id === id);
+  }
+
+  window.addEventListener('popstate', () => {
+    const index = indexFromHash();
+    if (index >= 0) openViewer(index); else hideViewer();
+  });
 
   galleryGrid.addEventListener('click', (e) => {
     const item = e.target.closest('.gallery-item');
     if (item) openLightbox(Math.max(0, galleryItems.indexOf(item)));
+  });
+
+  galleryGrid.addEventListener('keydown', (e) => {
+    const item = e.target.closest('.gallery-item');
+    if (item && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      openLightbox(galleryItems.indexOf(item));
+    }
   });
 
   lightbox.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
@@ -193,6 +274,12 @@
     if (e.key === 'Escape') closeLightbox();
     if (e.key === 'ArrowLeft') navigate(-1);
     if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'Tab') { // keep keyboard focus inside the viewer
+      const buttons = [...lightbox.querySelectorAll('button')].filter(b => b.offsetParent !== null);
+      const i = buttons.indexOf(document.activeElement);
+      e.preventDefault();
+      buttons[(i + (e.shiftKey ? -1 : 1) + buttons.length) % buttons.length].focus();
+    }
   });
 
   // ===== SCROLL REVEAL =====
@@ -216,7 +303,11 @@
 
   fetch('data/photos.json')
     .then(res => res.json())
-    .then(data => renderGallery(data.photos))
+    .then(data => {
+      renderGallery(data.photos);
+      const shared = indexFromHash();
+      if (shared >= 0) openViewer(shared); // a link to one photo
+    })
     .catch(err => console.error('Could not load data/photos.json', err))
     .finally(initReveal);
 
