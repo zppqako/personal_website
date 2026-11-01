@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portfolio — Photography</title>
+<title>SUN — Photography</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -13,7 +14,7 @@
 
 <!-- Navigation -->
 <nav id="navbar">
-  <a href="#" class="logo">Sun</a>
+  <a href="#" class="logo">SUN</a>
   <div class="nav-right">
     <ul class="nav-links">
       <li><a href="#gallery" class="active" data-zh="作品集">Gallery</a></li>
@@ -34,22 +35,12 @@
 
 <!-- Hero -->
 <section class="hero">
-  <h1 class="hero-title" data-zh-html="光影<br><em>瞬间</em>">Moments<br><em>in Light</em></h1>
+  <h1 class="hero-title" data-zh-html="光影<em>瞬间</em>">Moments <em>in Light</em></h1>
   <p class="hero-subtitle" data-zh="摄影作品集">Photography Portfolio</p>
-  <div class="scroll-indicator">
-    <span data-zh="向下滑动">Scroll</span>
-    <div class="scroll-line"></div>
-  </div>
 </section>
 
 <!-- Gallery Section -->
 <section id="gallery">
-  <div class="section-header reveal">
-    <p class="section-label" data-zh="精选作品">Selected Work</p>
-    <h2 class="section-title" data-zh="作品集">Gallery</h2>
-    <div class="section-divider"></div>
-  </div>
-
   <div class="gallery" id="galleryGrid"></div>
 </section>
 
@@ -72,15 +63,19 @@
 
 <!-- Footer -->
 <footer>
-  <p data-zh="&copy; 2026 Sun. 保留所有权利。">&copy; 2026 Sun. All Rights Reserved.</p>
+  <p data-zh="&copy; 2026 SUN. 保留所有权利。">&copy; 2026 SUN. All Rights Reserved.</p>
 </footer>
 
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox">
+  <p class="lightbox-counter" id="lightboxCounter"></p>
   <button class="lightbox-close" aria-label="Close"></button>
   <button class="lightbox-nav lightbox-prev" aria-label="Previous">&#8592;</button>
   <button class="lightbox-nav lightbox-next" aria-label="Next">&#8594;</button>
-  <img src="" alt="" id="lightboxImg">
+  <figure class="lightbox-figure">
+    <img src="" alt="" id="lightboxImg">
+    <figcaption class="lightbox-caption" id="lightboxCaption"></figcaption>
+  </figure>
 </div>
 
 <script src="js/main.js"></script>

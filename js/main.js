@@ -34,6 +34,22 @@
     return Math.round(photo.width * scale);
   }
 
+  // One quiet line under the photo in the lightbox, like a gallery wall label.
+  function captionFor(exif) {
+    if (!exif) return '';
+    const camera = exif.camera || '';
+    const model = camera.split(' ').slice(1).join(' ') || camera;
+    const lens = exif.lens && !(model && exif.lens.includes(model)) ? exif.lens : ''; // skip "iPhone … back camera"
+    return [
+      camera,
+      lens,
+      exif.focalLength && exif.focalLength + 'mm',
+      exif.aperture && '\u0192/' + exif.aperture,
+      exif.shutter,
+      exif.iso && 'ISO ' + exif.iso,
+    ].filter(Boolean).map(part => String(part).replace(/ /g, '\u00a0')).join('  \u00b7  '); // wrap only between parts
+  }
+
   function renderGallery(photos) {
     photos.filter(photo => !photo.hidden).forEach(photo => {
       const base = 'photos/' + photo.id;
@@ -41,6 +57,7 @@
       item.className = 'gallery-item';
       item.dataset.full = base + '-' + photo.sizes[photo.sizes.length - 1] + '.webp';
       item.dataset.ratio = photo.height / photo.width;
+      item.dataset.caption = captionFor(photo.exif);
 
       const picture = document.createElement('picture');
       const source = document.createElement('source');
@@ -54,10 +71,7 @@
       img.alt = (photo.alt && (photo.alt.en || photo.alt.zh)) || 'Photo';
       img.loading = 'lazy';
       picture.append(source, img);
-
-      const overlay = document.createElement('div');
-      overlay.className = 'gallery-overlay';
-      item.append(picture, overlay);
+      item.appendChild(picture);
       galleryItems.push(item);
     });
     layoutGallery();
@@ -119,16 +133,21 @@
   // ===== LIGHTBOX =====
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxCaption = document.getElementById('lightboxCaption');
+  const lightboxCounter = document.getElementById('lightboxCounter');
   let currentIndex = 0;
 
-  function showInLightbox(item) {
+  function showInLightbox(index) {
+    const item = galleryItems[index];
     lightboxImg.src = item.dataset.full;
     lightboxImg.alt = item.querySelector('img').alt;
+    lightboxCaption.textContent = item.dataset.caption;
+    lightboxCounter.textContent = (index + 1) + ' / ' + galleryItems.length;
   }
 
   function openLightbox(index) {
     currentIndex = index;
-    showInLightbox(galleryItems[currentIndex]);
+    showInLightbox(currentIndex);
     lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
@@ -140,7 +159,7 @@
 
   function navigate(dir) {
     currentIndex = (currentIndex + dir + galleryItems.length) % galleryItems.length;
-    showInLightbox(galleryItems[currentIndex]);
+    showInLightbox(currentIndex);
   }
 
   galleryGrid.addEventListener('click', (e) => {
@@ -153,6 +172,19 @@
   lightbox.querySelector('.lightbox-next').addEventListener('click', (e) => { e.stopPropagation(); navigate(1); });
   lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
 
+  // Swipe left/right to change photo on touch screens (the arrows are hidden on phones).
+  let touchStart = null;
+  lightbox.addEventListener('touchstart', (e) => {
+    touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, { passive: true });
+  lightbox.addEventListener('touchend', (e) => {
+    if (!touchStart) return;
+    const dx = e.changedTouches[0].clientX - touchStart.x;
+    const dy = e.changedTouches[0].clientY - touchStart.y;
+    touchStart = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) navigate(dx < 0 ? 1 : -1);
+  });
+
   document.addEventListener('keydown', (e) => {
     if (!lightbox.classList.contains('active')) return;
     if (e.key === 'Escape') closeLightbox();
@@ -161,21 +193,22 @@
   });
 
   // ===== SCROLL REVEAL =====
+  // Photos that come into view together fade in one after another (in reading
+  // order); the delay restarts for every batch instead of growing down the page.
   const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add(entry.target.classList.contains('gallery-item') ? 'visible' : 'revealed');
-      }
-    });
+    const appearing = entries.filter(entry => entry.isIntersecting).map(entry => entry.target);
+    appearing.forEach(el => observer.unobserve(el));
+    appearing.filter(el => !el.classList.contains('gallery-item')).forEach(el => el.classList.add('revealed'));
+    appearing.filter(el => el.classList.contains('gallery-item'))
+      .sort((a, b) => galleryItems.indexOf(a) - galleryItems.indexOf(b))
+      .forEach((el, i) => {
+        el.style.transitionDelay = (i * 0.08) + 's';
+        el.classList.add('visible');
+      });
   }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
   function initReveal() {
-    document.querySelectorAll('.reveal, .gallery-item').forEach((el, i) => {
-      if (el.classList.contains('gallery-item')) {
-        el.style.transitionDelay = ((galleryItems.indexOf(el) + 1) * 0.08) + 's';
-      }
-      observer.observe(el);
-    });
+    document.querySelectorAll('.reveal, .gallery-item').forEach(el => observer.observe(el));
   }
 
   fetch('data/photos.json')
@@ -216,7 +249,7 @@
     currentLang = lang;
     localStorage.setItem('lang', lang);
     document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
-    document.title = lang === 'zh' ? '作品集 — 摄影' : 'Portfolio \u2014 Photography';
+    document.title = lang === 'zh' ? 'SUN \u2014 摄影' : 'SUN \u2014 Photography';
     langToggle.textContent = lang === 'zh' ? 'EN' : '\u4E2D\u6587';
 
     document.querySelectorAll('[data-zh]').forEach(el => {
