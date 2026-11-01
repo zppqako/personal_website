@@ -9,15 +9,18 @@ Usage:
 
 Rules (see CLAUDE.md):
   - Album order is display order. Album photos go first, in album order.
-  - A photo removed from the album gets "hidden": true (files are kept).
-  - Entries imported from a folder keep their place after the album photos.
-    If an album photo has the same id (file name without extension), it takes over that entry.
+  - Only album photos are shown. Every other entry (removed from the album, or imported
+    from a folder and not in the album) gets "hidden": true; its files are kept.
+  - If an album photo has the same id (file name without extension) as a folder entry,
+    it takes over that entry.
+  - A photo that fails to export is skipped and reported; the rest of the sync still runs.
   - "alt" is the only hand-edited field; the script never overwrites it.
 """
 
 import argparse
 import hashlib
 import json
+import subprocess
 import sys
 import tempfile
 from datetime import datetime
@@ -240,21 +243,35 @@ def photos_fingerprint(photo):
     return "original"
 
 
-def export_from_photos(photo, tmpdir):
-    from osxphotos.photoexporter import ExportOptions, PhotoExporter
+# Photos.app exports the current version (edits applied) as JPEG and downloads
+# iCloud-only originals on the way. osxphotos' own iCloud download path silently
+# returned nothing here, so we call AppleScript directly.
+PHOTOS_EXPORT_SCRIPT = """
+on run argv
+  set destFolder to POSIX file (item 2 of argv)
+  tell application "Photos"
+    with timeout of 600 seconds
+      export {media item id ((item 1 of argv) & "/L0/001")} to destFolder
+    end timeout
+  end tell
+end run
+"""
 
-    options = ExportOptions(
-        edited=photo.hasadjustments,
-        convert_to_jpeg=True,
-        jpeg_quality=0.95,
-        download_missing=True,
-        use_photos_export=photo.ismissing,
-        overwrite=True,
-    )
-    results = PhotoExporter(photo).export(tmpdir, options=options)
-    if not results.exported:
-        raise RuntimeError(f"导出失败：{results.error or '未知错误'}")
-    return Path(results.exported[0])
+
+def export_from_photos(photo, tmpdir):
+    """Return a full-size image file of the photo's current version (edits applied)."""
+    local = photo.path_edited if photo.hasadjustments else photo.path
+    if local and Path(local).suffix.lower() in IMAGE_EXTS and Path(local).exists():
+        return Path(local)  # already on disk in a format Pillow reads
+
+    dest = Path(tmpdir) / photo.uuid
+    dest.mkdir(exist_ok=True)
+    result = subprocess.run(["osascript", "-", photo.uuid, str(dest)], input=PHOTOS_EXPORT_SCRIPT,
+                            capture_output=True, text=True, timeout=700)
+    files = [f for f in dest.iterdir() if f.suffix.lower() in IMAGE_EXTS]
+    if result.returncode != 0 or not files:
+        raise RuntimeError(result.stderr.strip() or "照片 App 没有导出任何文件")
+    return files[0]
 
 
 def unique_id(base, uuid, by_id):
@@ -283,31 +300,42 @@ def sync_album(data, album_name, force, dry_run):
 
     by_uuid = {e["source"].get("uuid"): e for e in data["photos"] if e["source"].get("type") == "photos"}
     by_id = {e["id"]: e for e in data["photos"]}
-    stats = {"new": 0, "updated": 0, "skipped": 0, "hidden": 0}
+    stats = {"new": 0, "updated": 0, "skipped": 0, "hidden": 0, "failed": 0}
     ordered = []
 
     with tempfile.TemporaryDirectory() as tmp:
         for photo in album_photos:
             fingerprint = photos_fingerprint(photo)
-            entry = by_uuid.get(photo.uuid)
-            if entry is None:
+            previous = by_uuid.get(photo.uuid)
+            if previous is None:
                 photo_id = unique_id(Path(photo.original_filename).stem.replace(" ", "_"), photo.uuid, by_id)
-                taken_over = by_id.get(photo_id)  # a folder entry with the same name is taken over
-                entry = dict(taken_over) if taken_over else new_entry(photo_id, {})
+                previous = by_id.get(photo_id)  # a folder entry with the same name is taken over
+                entry = dict(previous) if previous else new_entry(photo_id, {})
                 entry["source"] = {"type": "photos", "uuid": photo.uuid}
                 by_id[photo_id] = entry
-                status = "更新" if taken_over else "新增"
+                status = "更新" if previous else "新增"
             else:
+                entry = previous
                 unchanged = entry["source"].get("fingerprint") == fingerprint and outputs_exist(entry)
                 status = None if unchanged and not force else "更新"
 
             if status:
-                print(f"  {status} {photo.original_filename}")
-                stats["new" if status == "新增" else "updated"] += 1
+                print(f"  {status} {photo.original_filename}", flush=True)
                 if not dry_run:
-                    exported = export_from_photos(photo, tmp)
-                    apply_render(entry, exported, exif_from_photos(photo))
+                    try:
+                        exported = export_from_photos(photo, tmp)
+                        apply_render(entry, exported, exif_from_photos(photo))
+                    except Exception as err:  # keep going; report at the end
+                        print(f"    ✗ 失败：{err}")
+                        stats["failed"] += 1
+                        if previous is None:
+                            del by_id[entry["id"]]
+                            continue
+                        entry = previous  # keep the old version on the site
+                        ordered.append(entry)
+                        continue
                     entry["source"] = {"type": "photos", "uuid": photo.uuid, "fingerprint": fingerprint}
+                stats["new" if status == "新增" else "updated"] += 1
             else:
                 stats["skipped"] += 1
             entry["hidden"] = False
@@ -319,14 +347,15 @@ def sync_album(data, album_name, force, dry_run):
     for e in data["photos"]:
         if id(e) in in_album or e["id"] in ordered_ids:
             continue
-        if e["source"].get("type") == "photos" and not e.get("hidden"):
-            print(f"  下架 {e['id']}（已不在相簿中）")
+        if not e.get("hidden"):
+            print(f"  下架 {e['id']}（不在相簿中）")
             stats["hidden"] += 1
-            e["hidden"] = True
+            if not dry_run:
+                e["hidden"] = True
         rest.append(e)
     if not dry_run:
         data["photos"] = ordered + rest
-    return stats
+    return stats, len(ordered)
 
 
 # ---------- main ----------
@@ -343,16 +372,18 @@ def main():
     if args.folder:
         print(f"从文件夹导入：{args.folder}")
         stats = import_folder(data, args.folder, args.force, args.dry_run)
+        shown = sum(1 for e in data["photos"] if not e.get("hidden")) + (stats["new"] if args.dry_run else 0)
     else:
         print(f"同步照片 App 相簿：{args.album}")
-        stats = sync_album(data, args.album, args.force, args.dry_run)
+        stats, shown = sync_album(data, args.album, args.force, args.dry_run)
 
     if not args.dry_run:
         save_data(data)
-    labels = {"new": "新增", "updated": "更新", "skipped": "未变", "hidden": "下架"}
+    labels = {"new": "新增", "updated": "更新", "skipped": "未变", "hidden": "下架", "failed": "失败"}
     print("完成：" + "，".join(f"{labels[k]} {v}" for k, v in stats.items()))
-    shown = sum(1 for e in data["photos"] if not e.get("hidden"))
     print(f"网站将显示 {shown} 张照片")
+    if stats.get("failed"):
+        print("有照片处理失败（见上面的 ✗），修好后再运行一次即可，已成功的不会重复处理。")
 
 
 if __name__ == "__main__":
