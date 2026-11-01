@@ -1,14 +1,15 @@
-# Bill Sun 摄影作品集
+# Sun 摄影作品集
 
 个人摄影作品集网站，纯静态，部署在 GitHub Pages（`main` 分支根目录）。网站的目的只有一个：好好展示照片。
 
 - 线上地址：https://zppqako.github.io/personal_website/
-- 照片来源：Mac「照片」App 里的相簿 **「网站」**。相簿里有什么、按什么顺序，网站就显示什么。
+- 照片来源：Mac「照片」App 里的相簿 **「网站」**。相簿里有什么，网站就显示什么；**相簿倒序显示**（相簿最后一张在网站第一位，也就是新加的在最前面）。
+- 署名：网站上统一用 **Sun**（logo、页脚），不写全名。
 
 ## 目录结构
 
 ```
-index.html              页面骨架：导航、Hero、图库容器（空）、About、Contact、Lightbox
+index.html              页面骨架：导航、Hero、图库容器（空）、Contact、Lightbox（About 已于 2026-11 删除，旧文案在 git 历史里）
 css/style.css           全部样式
 js/main.js              全部交互；读取 data/photos.json 渲染图库
 data/photos.json        照片数据（脚本生成，alt 可手改）
@@ -23,7 +24,7 @@ originals/              旧的原图备份（gitignore，不进仓库，网站�
 
 ## 加新照片的标准流程
 
-1. 在照片 App 里把照片加入相簿「网站」，拖动调整顺序（相簿顺序 = 网站顺序）。
+1. 在照片 App 里把照片加入相簿「网站」。新照片加在相簿末尾，网站上就显示在最前面；拖动可以调整顺序（网站顺序 = 相簿倒序）。
 2. 运行 `./update.sh`：同步相簿、生成图片、更新 `data/photos.json`，然后在 http://localhost:8000 开预览。
 3. 预览没问题后提交并推送：`git add -A && git commit -m "update photos" && git push`。GitHub Pages 1–2 分钟后更新。
 
@@ -56,7 +57,7 @@ originals/              旧的原图备份（gitignore，不进仓库，网站�
 }
 ```
 
-- **数组顺序就是显示顺序。** 同步后，相簿里的照片按相簿顺序排在最前面，其余条目全部隐藏，排在后面。
+- **数组顺序就是显示顺序。** 同步后，相簿里的照片按**相簿倒序**排在最前面，其余条目全部隐藏，排在后面。
 - `id`：原文件名去掉扩展名（空格换成 `_`），同时决定图片文件名。重名时追加 uuid 前 6 位。
 - `source.type`：
   - `photos`：来自照片 App。`uuid` 是照片 App 里的 ID；`fingerprint` 记录是否编辑过、何时编辑，用来判断要不要重新导出。
@@ -78,9 +79,9 @@ originals/              旧的原图备份（gitignore，不进仓库，网站�
 ## 设计原则
 
 - 极简、留白、照片优先，界面不和照片抢注意力。
-- 配色：背景 `#f5f4f0`，文字 `#1a1a1a`，辅助灰 `#6b6b6b` / `#a0a0a0`，全部定义在 `css/style.css` 的 `:root`。
+- 配色：背景 `#f5f5f5`（完全中性的浅灰，不带冷暖色偏，像美术馆墙面，不影响对照片颜色的判断），文字 `#1a1a1a`，辅助灰 `#6b6b6b` / `#a0a0a0`，全部定义在 `css/style.css` 的 `:root`。背景不要再加色调。
 - 字体：标题用 Cormorant Garamond（衬线，细），正文和导航用 DM Sans（无衬线，细，大写加字距），从 Google Fonts 加载。
-- 图库：CSS columns 瀑布流。>1024px 3 列，481–1024px 2 列，≤480px 1 列。最大宽度 1600px。
+- 图库：瀑布流，**从左到右阅读**（第一行是第 1、2、3 张）。>1024px 3 列，481–1024px 2 列，≤480px 1 列。最大宽度 1600px。
 - 动效：缓入淡出、轻微上移，曲线 `--transition`；悬停时图片放大 1.03 倍并加淡黑遮罩。
 - 中英双语：元素上用 `data-zh` 或 `data-zh-html` 写中文，英文直接写在 HTML 里，右上角切换，选择存在 localStorage。新增文字时两种语言都要写。
 
@@ -90,7 +91,9 @@ originals/              旧的原图备份（gitignore，不进仓库，网站�
 - 照片导出（`export_from_photos`）：本地有可读的文件（编辑过的照片用编辑版，没编辑过用原片）就直接读取；否则用 AppleScript 让照片 App 导出当前版本（会自动下载 iCloud 原片，HEIC/DNG 会转成 JPEG）。osxphotos 只用来读图库数据库，不用它导出，因为它的 iCloud 下载在这里拿不到任何文件，也不报错。
 - 单张照片导出失败时会跳过它，其余照片照常处理，结尾列出失败的照片。再跑一次即可，已成功的不会重复处理。
 - 点击图库用事件委托（挂在 `#galleryGrid` 上），lightbox 读取每项的 `data-full`。
-- `sizes` 属性（`GALLERY_SIZES`）和 CSS 列数断点是对应的。改列数时两处要一起改。
+- 瀑布流由 `layoutGallery()` 用 JS 分列：前面的照片依次放进最短的列，最后 8 张会穷举所有放法，选底部最平的一种。不要换回 CSS `columns`，那种写法是竖着先填满第一列，最新的照片会全挤在左边。
+- 列数只在 CSS 里定义：`.gallery` 的 `--gallery-columns` 变量（媒体查询里修改），JS 读取它；窗口跨断点时会重新分列。
+- `sizes` 属性（`GALLERY_SIZES`）和列数断点是对应的。改列数时 CSS 和 `GALLERY_SIZES` 要一起改。
 - 本地预览必须走 HTTP 服务器（`./update.sh` 或 `python3 -m http.server`）。**直接双击打开 index.html 图库会是空的**，因为 file:// 下 fetch 读不了 JSON。
 
 ## 不要做的事

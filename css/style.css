@@ -1,5 +1,5 @@
 :root {
-  --bg: #f5f4f0;
+  --bg: #f5f5f5;
   --fg: #1a1a1a;
   --fg-muted: #6b6b6b;
   --fg-faint: #a0a0a0;
@@ -41,7 +41,7 @@ nav {
 
 nav.scrolled {
   padding: 18px 48px;
-  background: rgba(245, 244, 240, 0.92);
+  background: rgba(245, 245, 245, 0.92);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -272,15 +272,21 @@ nav.scrolled {
 
 /* ===== MASONRY GALLERY ===== */
 .gallery {
+  --gallery-columns: 3; /* read by js/main.js */
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(28px, 3.5vw, 52px);
   padding: 0 clamp(16px, 3vw, 48px);
-  columns: 3;
-  column-gap: clamp(28px, 3.5vw, 52px);
   max-width: 1600px;
   margin: 0 auto;
 }
 
+.gallery-column {
+  flex: 1;
+  min-width: 0;
+}
+
 .gallery-item {
-  break-inside: avoid;
   margin-bottom: clamp(28px, 3.5vw, 52px);
   position: relative;
   overflow: hidden;
@@ -402,53 +408,6 @@ nav.scrolled {
 .lightbox-prev { left: 20px; }
 .lightbox-next { right: 20px; }
 
-/* ===== ABOUT ===== */
-.about {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 80px 24px 120px;
-  text-align: center;
-}
-
-.about p {
-  font-family: var(--serif);
-  font-size: 1.35rem;
-  font-weight: 300;
-  line-height: 1.8;
-  color: var(--fg-muted);
-  font-style: italic;
-}
-
-.about-name {
-  font-family: var(--sans);
-  font-size: 0.72rem;
-  letter-spacing: 0.15em;
-  text-indent: 0.15em;
-  text-transform: uppercase;
-  color: var(--fg-faint);
-  margin-top: 40px;
-}
-
-.about p + p {
-  margin-top: 28px;
-}
-
-.about-quote {
-  font-size: 1.5rem;
-  color: var(--fg);
-  margin-top: 52px;
-  margin-bottom: 52px;
-}
-
-.about-closing {
-  font-style: normal;
-  font-size: 1.05rem;
-  letter-spacing: 0.04em;
-  color: var(--fg);
-  margin-top: 48px;
-  line-height: 2;
-}
-
 /* ===== CONTACT ===== */
 .contact {
   text-align: center;
@@ -512,7 +471,7 @@ footer p {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
-  .gallery { columns: 2; }
+  .gallery { --gallery-columns: 2; }
 }
 
 @media (max-width: 768px) {
@@ -522,14 +481,12 @@ footer p {
   .nav-links { display: none; }
   .menu-toggle { display: block; }
 
-  .gallery { columns: 2; }
-
   .hero-title { font-size: clamp(2.4rem, 10vw, 4.5rem); }
 }
 
 @media (max-width: 480px) {
   .gallery {
-    columns: 1;
+    --gallery-columns: 1;
     padding: 0 16px;
   }
 

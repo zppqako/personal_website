@@ -40,6 +40,7 @@
       const item = document.createElement('div');
       item.className = 'gallery-item';
       item.dataset.full = base + '-' + photo.sizes[photo.sizes.length - 1] + '.webp';
+      item.dataset.ratio = photo.height / photo.width;
 
       const picture = document.createElement('picture');
       const source = document.createElement('source');
@@ -57,10 +58,63 @@
       const overlay = document.createElement('div');
       overlay.className = 'gallery-overlay';
       item.append(picture, overlay);
-      galleryGrid.appendChild(item);
+      galleryItems.push(item);
     });
-    galleryItems = [...galleryGrid.querySelectorAll('.gallery-item')];
+    layoutGallery();
   }
+
+  // Masonry that reads left to right: photo 1, 2, 3 form the first row, then each
+  // photo goes into the currently shortest column. The last few photos are placed
+  // to keep the bottom edge even. Column count comes from the --gallery-columns
+  // CSS variable, so breakpoints live only in style.css.
+  const BALANCE_TAIL = 8;
+  let currentColumns = 0;
+
+  function layoutGallery() {
+    const style = getComputedStyle(galleryGrid);
+    const count = parseInt(style.getPropertyValue('--gallery-columns'), 10) || 1;
+    if (count === currentColumns) return;
+    currentColumns = count;
+
+    // Heights in units of column width; the space below each photo equals the column gap.
+    const gap = parseFloat(style.columnGap) || 0;
+    const inner = galleryGrid.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    const spacing = gap / ((inner - gap * (count - 1)) / count);
+    const cost = item => Number(item.dataset.ratio) + spacing;
+
+    const placement = [];
+    const heights = new Array(count).fill(0);
+    const tail = count > 1 ? Math.min(BALANCE_TAIL, galleryItems.length) : 0;
+    const head = galleryItems.length - tail;
+    for (let i = 0; i < head; i++) {
+      const shortest = heights.indexOf(Math.min(...heights));
+      placement.push(shortest);
+      heights[shortest] += cost(galleryItems[i]);
+    }
+
+    // Try every way to place the tail and keep the one with the flattest bottom.
+    let best = [], bestSpread = Infinity;
+    for (let combo = 0; combo < count ** tail; combo++) {
+      const h = heights.slice(), choice = [];
+      for (let k = 0, c = combo; k < tail; k++, c = Math.floor(c / count)) {
+        choice.push(c % count);
+        h[c % count] += cost(galleryItems[head + k]);
+      }
+      const spread = Math.max(...h) - Math.min(...h);
+      if (spread < bestSpread - 1e-6) { bestSpread = spread; best = choice; }
+    }
+    placement.push(...best);
+
+    const columns = Array.from({ length: count }, () => {
+      const col = document.createElement('div');
+      col.className = 'gallery-column';
+      return col;
+    });
+    galleryItems.forEach((item, i) => columns[placement[i]].appendChild(item));
+    galleryGrid.replaceChildren(...columns);
+  }
+
+  window.addEventListener('resize', layoutGallery);
 
   // ===== LIGHTBOX =====
   const lightbox = document.getElementById('lightbox');
@@ -118,7 +172,7 @@
   function initReveal() {
     document.querySelectorAll('.reveal, .gallery-item').forEach((el, i) => {
       if (el.classList.contains('gallery-item')) {
-        el.style.transitionDelay = (i * 0.08) + 's';
+        el.style.transitionDelay = ((galleryItems.indexOf(el) + 1) * 0.08) + 's';
       }
       observer.observe(el);
     });
