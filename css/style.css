@@ -265,6 +265,7 @@ nav.scrolled {
 
 /* ===== LIGHTBOX ===== */
 .lightbox {
+  --lightbox-gutter: clamp(72px, 9vw, 132px); /* side space reserved for the arrows */
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -297,7 +298,7 @@ nav.scrolled {
 }
 
 .lightbox img {
-  max-width: 90vw;
+  max-width: calc(100vw - 2 * var(--lightbox-gutter));
   max-height: 82vh;
   object-fit: contain;
   display: block;
@@ -323,6 +324,7 @@ nav.scrolled {
 
 .lightbox-close {
   position: absolute;
+  z-index: 2;
   top: 28px;
   right: 36px;
   width: 36px;
@@ -340,7 +342,7 @@ nav.scrolled {
   content: '';
   position: absolute;
   width: 24px;
-  height: 1.5px;
+  height: 1px;
   background: rgba(255,255,255,0.7);
   transition: background 0.3s;
 }
@@ -350,22 +352,46 @@ nav.scrolled {
 .lightbox-close:hover::before,
 .lightbox-close:hover::after { background: #fff; }
 
+/* Hairline arrows in their own gutters: the whole gutter is the click target,
+   and the photo is sized so it can never cover them. */
 .lightbox-nav {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  z-index: 1;
+  top: 96px;
+  bottom: 96px;
+  width: var(--lightbox-gutter);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 20px;
-  color: rgba(255,255,255,0.5);
-  font-size: 1.8rem;
+  color: rgba(255,255,255,0.45);
   transition: color 0.3s;
 }
 
-.lightbox-nav:hover { color: #fff; }
-.lightbox-prev { left: 20px; }
-.lightbox-next { right: 20px; }
+.lightbox-prev { left: 0; }
+.lightbox-next { right: 0; }
+
+.lightbox-nav svg {
+  width: 44px;
+  height: 12px;
+  overflow: visible;
+  transition: transform 0.45s var(--transition);
+}
+
+.lightbox-nav path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.lightbox-nav:hover,
+.lightbox-nav:focus-visible { color: #fff; outline: none; }
+.lightbox-prev:hover svg { transform: translateX(-6px); }
+.lightbox-next:hover svg { transform: translateX(6px); }
 
 /* ===== CONTACT ===== */
 .contact {
@@ -450,6 +476,7 @@ footer p {
     padding: 0 16px;
   }
 
+  .lightbox { --lightbox-gutter: 16px; } /* arrows hidden, swipe instead */
   .lightbox-nav { display: none; }
   .lightbox-counter { top: 36px; left: 24px; }
   .lightbox-caption { padding: 0 16px; }
