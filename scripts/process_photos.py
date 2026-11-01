@@ -8,7 +8,7 @@ Usage:
   add --force to regenerate everything, --dry-run to only print what would happen
 
 Rules (see CLAUDE.md):
-  - Album order is display order. Album photos go first, in album order.
+  - Display order is the album order reversed: the last photo in the album is shown first.
   - Only album photos are shown. Every other entry (removed from the album, or imported
     from a folder and not in the album) gets "hidden": true; its files are kept.
   - If an album photo has the same id (file name without extension) as a folder entry,
@@ -354,7 +354,7 @@ def sync_album(data, album_name, force, dry_run):
                 e["hidden"] = True
         rest.append(e)
     if not dry_run:
-        data["photos"] = ordered + rest
+        data["photos"] = ordered[::-1] + rest  # newest addition (end of album) first
     return stats, len(ordered)
 
 
